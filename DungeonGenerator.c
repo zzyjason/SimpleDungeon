@@ -14,7 +14,7 @@ void generateHallway(char *map, int *roomLocation, int *hallwayPoint, int* roomP
 
 char* GenerateNewMap()
 {
-    int i,j,counter, x, y;
+    int i,counter;
     srand(time(NULL));
     char *map = (char*) malloc(80 * 24 * sizeof(char));
     for(i=0; i< 80*64; i++)
@@ -31,7 +31,6 @@ char* GenerateNewMap()
     }
 
     int totalRoomArea = (rand()%10 + 20) * 80 * 24 / 100;
-    int totalHallArea = (rand()%10 + 15) * 80 * 24 / 100;
     int AvgArea = totalRoomArea / numsRoom;
     //printf("numsRoom: %d\n", numsRoom);
     //printf("Total Room Area: %d\nTotal Hall Area: %d\nAvgArea: %d\n", totalRoomArea, totalHallArea, AvgArea);
@@ -169,7 +168,7 @@ void generateHallwayPoints(char *map, int *hallwayPoint, int numsRoom)
 void printHallway(char *map)
 {
 	int i, j;
-	printf("\n----------------------------------------------------------------------------------\n");
+	printf("----------------------------------------------------------------------------------\n");
 	for (i = 0; i<24; i++)
 	{
 		printf("|");
