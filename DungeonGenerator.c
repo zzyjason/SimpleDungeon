@@ -8,19 +8,21 @@ void placeRoom(char *map,int *roomLocation,int room, int plan, int dx, int dy);
 int CheckEnoughRoom(char *map, int startX, int startY,int dx, int dy);
 int placePlanChecker(char *map, int x, int y, int dx, int dy, int plan, int minX, int minY);
 void placeHallway(char *map,int x1, int y1, int x2, int y2);
-int count = 0;
+void generateHallwayPoints(char *map, int *hallwayPoint, int numsRoom);
+void printHallway(char *map);
+void generateHallway(char *map, int *roomLocation, int *hallwayPoint, int* roomPlan, int numsRoom);
 
 char* GenerateNewMap()
 {
     int i,j,counter, x, y;
     srand(time(NULL));
-    char *NewMap = (char*) malloc(80 * 24 * sizeof(char));
+    char *map = (char*) malloc(80 * 24 * sizeof(char));
     for(i=0; i< 80*64; i++)
     {
-        NewMap[i] = ' ';
+        map[i] = ' ';
     }
 
-    int numsRoom = rand()%3 + 6;
+    int numsRoom = rand()%5 + 7;
     int *roomPlan = (int*) malloc(3 * numsRoom * sizeof(int));
     int *roomLocation = (int*) malloc(2 * numsRoom * sizeof(int));
     for(i=0; i< 2*numsRoom; i++)
@@ -31,130 +33,153 @@ char* GenerateNewMap()
     int totalRoomArea = (rand()%10 + 20) * 80 * 24 / 100;
     int totalHallArea = (rand()%10 + 15) * 80 * 24 / 100;
     int AvgArea = totalRoomArea / numsRoom;
-    printf("numsRoom: %d\n", numsRoom);
-    printf("Total Room Area: %d\nTotal Hall Area: %d\nAvgArea: %d\n", totalRoomArea, totalHallArea, AvgArea);
+    //printf("numsRoom: %d\n", numsRoom);
+    //printf("Total Room Area: %d\nTotal Hall Area: %d\nAvgArea: %d\n", totalRoomArea, totalHallArea, AvgArea);
 
     for(i=0, counter = 0; i < numsRoom; i++)
     {
         roomPlan[counter++] = rand() % 11;
         roomPlan[counter++] = (int) sqrt((double) ((rand() % 13) * AvgArea / 10)) + 3;
         roomPlan[counter++] = (int) sqrt((double) ((rand() % 13) * AvgArea / 10)) + 3;
-        printf("\nPlan: %d    dx: %d    dy:%d\n", roomPlan[counter - 3], roomPlan[counter - 2], roomPlan[counter - 1]);
-        placeRoom(NewMap, roomLocation, i, roomPlan[counter - 3], roomPlan[counter - 2], roomPlan[counter - 1]);
+        //printf("\nPlan: %d    dx: %d    dy:%d\n", roomPlan[counter - 3], roomPlan[counter - 2], roomPlan[counter - 1]);
+        placeRoom(map, roomLocation, i, roomPlan[counter - 3], roomPlan[counter - 2], roomPlan[counter - 1]);
     }
 
     int *hallwayPoint = (int*) malloc (numsRoom * sizeof(int));
-    for(i=0; i<numsRoom/3 + 1; i++)
-    {
-        do{
-            x = rand()%78 + 1;
-            y = rand()%22 + 1;
-        } while(NewMap[y*80+x]!=' ');
+	generateHallwayPoints(map, hallwayPoint, numsRoom);
+	generateHallway(map, roomLocation, hallwayPoint, roomPlan, numsRoom);
+	printHallway(map);
 
-        hallwayPoint[i*2] = x;
-        hallwayPoint[i*2 + 1] = y;
-        NewMap[y*80+x] = '#';
-    }
-    count = 0;
-    for(i=0; i<numsRoom; i++)
-    {
-        int randomSkip = rand()%100;
+	return map;
+}
 
-        x = roomLocation[i*2];
-        y = roomLocation[i*2+1];
-        int dx = roomPlan[i*3+1];
-        int dy = roomPlan[i*3+2];
-        int startX = roomLocation[i*2];
-        int startY = roomLocation[i*2+1];
-        printf("Room: %d    StartX: %d    StartY: %d\n", i, startX, startY);
+void generateHallway(char *map, int *roomLocation, int *hallwayPoint, int* roomPlan, int numsRoom)
+{
+	int i, x, y;
+	for (i = 0; i<numsRoom; i++)
+	{
+		int randomSkip = rand() % 100;
 
-        while(NewMap[y*80+x]==' ')
-        {
-            x++;
-            if(x>startX+dx)
-            {
-                x = startX;
-                y++;
-            }
-        }
-        int dir = 0;
-        while(randomSkip!=0)
-        {
-            switch(dir)
-            {
-                case 0:
-                    if(y-1>=startY && NewMap[(y-1)*80 + x] == '.')
-                    {
-                        dir = 3;
-                        break;
-                    }
-                    else if(x+1>startX+dx || NewMap[y*80 + x + 1] != '.')
-                    {
-                        dir = 1;
-                        break;
-                    }
-                    x++;
-                    break;
-                case 1:
-                    if(x+1<=startX+dx && NewMap[y*80 + x + 1] == '.')
-                    {
-                        dir = 0;
-                        break;
-                    }
-                    else if(y+1>startY+dy || NewMap[(y+1)*80 + x] != '.')
-                    {
-                        dir = 2;
-                        break;
-                    }
-                    y++;
-                    break;
-                case 2:
-                    if(y+1<=startY+dy && NewMap[(y+1)*80 + x] == '.')
-                    {
-                        dir = 1;
-                        break;
-                    }
-                    else if(x-1<startX || NewMap[y*80 + x - 1] != '.')
-                    {
-                        dir = 3;
-                        break;
-                    }
-                    x--;
-                    break;
-                case 3:
-                    if(x-1>=startX && NewMap[y*80 + x -1] == '.')
-                    {
-                        dir = 2;
-                        break;
-                    }
-                    else if(y-1<startY || NewMap[(y-1)*80 + x] != '.')
-                    {
-                        dir = 0;
-                        break;
-                    }
-                    y--;
-                    break;
-            }
-            randomSkip--;
-        }
+		x = roomLocation[i * 2];
+		y = roomLocation[i * 2 + 1];
+		int dx = roomPlan[i * 3 + 1];
+		int dy = roomPlan[i * 3 + 2];
+		int startX = roomLocation[i * 2];
+		int startY = roomLocation[i * 2 + 1];
+		if (startX == -1 || startY == -1)
+		{
+			continue;
+		}
+		//printf("Room: %d    StartX: %d    StartY: %d\n", i, startX, startY);
 
-        int nextHallwayPoint = i%(numsRoom/3 + 1);
-        placeHallway(NewMap, x, y, hallwayPoint[nextHallwayPoint * 2], hallwayPoint[nextHallwayPoint* 2 + 1]);
-        nextHallwayPoint = (i+1)%(numsRoom/3 + 1);
-        placeHallway(NewMap, x, y, hallwayPoint[nextHallwayPoint * 2], hallwayPoint[nextHallwayPoint* 2 + 1]);
-    }
+		while (map[y * 80 + x] == ' ')
+		{
+			x++;
+			if (x>startX + dx)
+			{
+				x = startX;
+				y++;
+			}
+		}
 
-    printf("\n----------------------------------------------------------------------------------\n");
-    for(i=0; i<24; i++)
-    {
-        printf("|");
-        for(j=0; j<80; j++)
-        {
-            printf("%c", NewMap[i*80 + j]);
-        }
-        printf("|\n");
-    }
-    printf("----------------------------------------------------------------------------------\n");
+		int dir = 0;
+		while (randomSkip != 0)
+		{
+			switch (dir)
+			{
+			case 0:
+				if (y - 1 >= startY && map[(y - 1) * 80 + x] == '.')
+				{
+					dir = 3;
+					break;
+				}
+				else if (x + 1>startX + dx || map[y * 80 + x + 1] != '.')
+				{
+					dir = 1;
+					break;
+				}
+				x++;
+				break;
+			case 1:
+				if (x + 1 <= startX + dx && map[y * 80 + x + 1] == '.')
+				{
+					dir = 0;
+					break;
+				}
+				else if (y + 1>startY + dy || map[(y + 1) * 80 + x] != '.')
+				{
+					dir = 2;
+					break;
+				}
+				y++;
+				break;
+			case 2:
+				if (y + 1 <= startY + dy && map[(y + 1) * 80 + x] == '.')
+				{
+					dir = 1;
+					break;
+				}
+				else if (x - 1<startX || map[y * 80 + x - 1] != '.')
+				{
+					dir = 3;
+					break;
+				}
+				x--;
+				break;
+			case 3:
+				if (x - 1 >= startX && map[y * 80 + x - 1] == '.')
+				{
+					dir = 2;
+					break;
+				}
+				else if (y - 1<startY || map[(y - 1) * 80 + x] != '.')
+				{
+					dir = 0;
+					break;
+				}
+				y--;
+				break;
+			}
+			randomSkip--;
+		}
+		int nextHallwayPoint = i % (numsRoom / 3 + 1);
+		placeHallway(map, x, y, hallwayPoint[nextHallwayPoint * 2], hallwayPoint[nextHallwayPoint * 2 + 1]);
+		nextHallwayPoint = (i + 1) % (numsRoom / 3 + 1);
+		placeHallway(map, x, y, hallwayPoint[nextHallwayPoint * 2], hallwayPoint[nextHallwayPoint * 2 + 1]);
+	}
+}
+
+void generateHallwayPoints(char *map, int *hallwayPoint, int numsRoom)
+{
+	int i, x, y;
+	for (i = 0; i<numsRoom / 3 + 1; i++)
+	{
+		do {
+			x = rand() % 78 + 1;
+			y = rand() % 22 + 1;
+		} while (map[y * 80 + x] != ' ');
+
+		hallwayPoint[i * 2] = x;
+		hallwayPoint[i * 2 + 1] = y;
+		//printf("Hallway Point: %d, %d\n", x, y);
+		map[y * 80 + x] = '#';
+	}
+}
+
+void printHallway(char *map)
+{
+	int i, j;
+	printf("\n----------------------------------------------------------------------------------\n");
+	for (i = 0; i<24; i++)
+	{
+		printf("|");
+		for (j = 0; j<80; j++)
+		{
+			printf("%c", map[i * 80 + j]);
+		}
+		printf("|\n");
+	}
+	printf("----------------------------------------------------------------------------------\n");
 }
 
 void placeHallway(char *map,int x1, int y1, int x2, int y2)
@@ -226,12 +251,11 @@ void placeRoom(char *map,int *roomLocation, int room, int plan, int dx, int dy)
                 {
                     if (placePlanChecker(map, j, i, dx, dy, plan, minX, minY))
                     {
-                        map[(startY + i)*80 + startX + j] = '.';//count + '0';
+                        map[(startY + i)*80 + startX + j] = '.';
                     }
                 }
             }
 
-            count++;
             break;
         }
         else
@@ -242,13 +266,12 @@ void placeRoom(char *map,int *roomLocation, int room, int plan, int dx, int dy)
 
         if(counter > 100)
         {
-            printf("Failed Placed Room");
             return;
         }
 
     }
 
-    printf("Successfully Placed Room, Counter: %d", counter);
+    //printf("Successfully Placed Room, Counter: %d", counter);
 }
 
 int CheckEnoughRoom(char *map, int startX, int startY,int dx, int dy)

@@ -1,0 +1,10 @@
+DungeonGenerator.c
+Use to generate random map. User should call GenerateNewMap function to generate map. 
+It retrun a char pointer which is 80 * 24 sizes. 
+It randomly generate 5~11 rooms in random position with random generated hallway connect randomly each other.
+In the function, there is local variable that contain info: numsRoom, roomPlan, roomLocation. 
+where numsRoom is int, roomPlan is int pointer, roomLocation is also a int pointer.
+roomPlan contain sets of int group by 3. first: room shape type, sencond: room dx, 3rd: room dy.
+roomLocation contain sets of int group by 2 for the top leftroom point , 1st: StartX, 2nd: StartY.
+
+ 
