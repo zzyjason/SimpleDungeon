@@ -1,6 +1,6 @@
 all: project
 
-project0: main.c
+project: main.c
 	gcc -Wall -Werror -g main.c -o main -lm
 
 clean:
