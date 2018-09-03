@@ -1,7 +1,7 @@
 all: project
 
 project: main.c
-	gcc -Wall -Werror -g main.c -o main -lm
+	gcc -o main main.c DungeonGenerator.c -lm
 
 clean:
 	rm -f main

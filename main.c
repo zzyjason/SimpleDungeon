@@ -1,7 +1,10 @@
-#include "DungeonGenerator.c"
-
+#include "DungeonGenerator.h"
+#include <stdlib.h>
 int main()
 {
-    GenerateNewMap();
+    MapInfo info = GenerateNewMap();
+	free(info.HallwayPoints);
+	free(info.map);
+	free(info.rooms);
     return 0;
 }
