@@ -16,8 +16,8 @@ char* GenerateNewMap()
 {
     int i,counter;
     srand(time(NULL));
-    char *map = (char*) malloc(80 * 24 * sizeof(char));
-    for(i=0; i< 80*64; i++)
+    char *map = (char*) malloc(80 * 21 * sizeof(char));
+    for(i=0; i< 80*21; i++)
     {
         map[i] = ' ';
     }
@@ -30,7 +30,7 @@ char* GenerateNewMap()
         roomLocation[i] = -1;
     }
 
-    int totalRoomArea = (rand()%10 + 20) * 80 * 24 / 100;
+    int totalRoomArea = (rand()%10 + 20) * 80 * 21 / 100;
     int AvgArea = totalRoomArea / numsRoom;
     //printf("numsRoom: %d\n", numsRoom);
     //printf("Total Room Area: %d\nTotal Hall Area: %d\nAvgArea: %d\n", totalRoomArea, totalHallArea, AvgArea);
@@ -169,7 +169,7 @@ void printHallway(char *map)
 {
 	int i, j;
 	printf("----------------------------------------------------------------------------------\n");
-	for (i = 0; i<24; i++)
+	for (i = 0; i<21; i++)
 	{
 		printf("|");
 		for (j = 0; j<80; j++)
@@ -221,7 +221,7 @@ void placeHallway(char *map,int x1, int y1, int x2, int y2)
 void placeRoom(char *map,int *roomLocation, int room, int plan, int dx, int dy)
 {
     int startX = rand()%74 + 1;
-    int startY = rand()%19 +1;
+    int startY = rand()%18 +1;
     int counter = 0;
     int i,j;
 
@@ -260,7 +260,7 @@ void placeRoom(char *map,int *roomLocation, int room, int plan, int dx, int dy)
         else
         {
             startX = rand()%75 + 1;
-            startY = rand()%20 +1;
+            startY = rand()%17 +1;
         }
 
         if(counter > 100)
@@ -281,7 +281,7 @@ int CheckEnoughRoom(char *map, int startX, int startY,int dx, int dy)
         for(j=0; j<dx; j++)
         {
             current = (startY + i)*80 + startX + j;
-            if(startY+i >= 23 || startX+j >= 79 || startY+i <= 0 || startX+j <= 0 || map[current] != ' ' || map[current -1] != ' ' || map[current + 1] != ' ' || map[current + 80] != ' ' || map[current-80] != ' ' )
+            if(startY+i >= 20 || startX+j >= 79 || startY+i <= 0 || startX+j <= 0 || map[current] != ' ' || map[current -1] != ' ' || map[current + 1] != ' ' || map[current + 80] != ' ' || map[current-80] != ' ' )
             {
                 return 0;
             }
