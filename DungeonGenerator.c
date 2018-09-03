@@ -184,12 +184,12 @@ void printHallway(char *map)
 {
 	int i, j;
 	printf("----------------------------------------------------------------------------------\n");
-	for (i = 0; i<21; i++)
+	for (i = 0; i<HEIGHT; i++)
 	{
 		printf("|");
-		for (j = 0; j<80; j++)
+		for (j = 0; j<WIDTH; j++)
 		{
-			printf("%c", map[i * 80 + j]);
+			printf("%c", map[i * WIDTH + j]);
 		}
 		printf("|\n");
 	}
@@ -207,16 +207,16 @@ void placeHallway(char *map, Point start, Point end)
         else if(current_x - end.x < 0)
             current_x++;
 
-        if(map[current_y*80 + current_x] == ' ')
-            map[current_y*80 + current_x] = '#';
+        if(map[current_y*WIDTH + current_x] == ' ')
+            map[current_y*WIDTH + current_x] = '#';
 
         if(current_y - end.y > 0)
             current_y--;
         else if(current_y - end.y < 0)
             current_y++;
 
-        if(map[current_y*80 + current_x] == ' ')
-            map[current_y*80 + current_x] = '#';
+        if(map[current_y*WIDTH + current_x] == ' ')
+            map[current_y*WIDTH + current_x] = '#';
     }
 }
 
