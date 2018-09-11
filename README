@@ -1,10 +1,10 @@
-DungeonGenerator.c
+DungeonGenerator
 Use to generate random map. User should call GenerateNewMap function to generate map. 
-It retrun a char pointer which is 80 * 24 sizes. 
-It randomly generate 5~11 rooms in random position with random generated hallway connect randomly each other.
-In the function, there is local variable that contain info: numsRoom, roomPlan, roomLocation. 
-where numsRoom is int, roomPlan is int pointer, roomLocation is also a int pointer.
-roomPlan contain sets of int group by 3. first: room shape type, sencond: room dx, 3rd: room dy.
-roomLocation contain sets of int group by 2 for the top leftroom point , 1st: StartX, 2nd: StartY.
+It retrun a Map Info Sturct, which contain all info about the map. 
+It randomly generate 7~12 rooms in random position with random generated hallway connect randomly each other.
+There are 4 struct in the header file:
+Point which has 2 int, x and y position
+Size which has 2 int, dx and dy for the size of anything.
+Room which include topleft point, room type(shape of the room, YES, room has different shapes, I have about 10 shapes randomlly picked. It will be removed for next checkpoint due to loading and saving requirement), size of the room, Point pointer for all the floor it cover(unsued currently)
+MapInfo has all the info for the map, rooms, nums Rooms, hallway Points, size, and the map which is char pointer sizes of 80*21
 
- 

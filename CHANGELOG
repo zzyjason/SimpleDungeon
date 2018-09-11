@@ -1,3 +1,6 @@
 8/27/2018
 Added main.c -> print one generated map.
-Added DungeonGenerator.c -> generate random map. 
+Added DungeonGenerator.c -> generate random map.
+
+9/7/2018
+Finished Changing data structures. from many pointer to struct. 
