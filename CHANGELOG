@@ -4,3 +4,11 @@ Added DungeonGenerator.c -> generate random map.
 
 9/7/2018
 Finished Changing data structures. from many pointer to struct. 
+
+
+9/11/2018
+Start Implementing ProfileManager
+
+9/12/2018
+Finish Implementing profileManager
+Added helper function for create new mapInfo

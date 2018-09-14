@@ -1,3 +1,6 @@
+This is a simple dungeon like game.
+Below is the detail info about each component of the game.
+
 DungeonGenerator
 Use to generate random map. User should call GenerateNewMap function to generate map. 
 It retrun a Map Info Sturct, which contain all info about the map. 
@@ -8,3 +11,12 @@ Size which has 2 int, dx and dy for the size of anything.
 Room which include topleft point, room type(shape of the room, YES, room has different shapes, I have about 10 shapes randomlly picked. It will be removed for next checkpoint due to loading and saving requirement), size of the room, Point pointer for all the floor it cover(unsued currently)
 MapInfo has all the info for the map, rooms, nums Rooms, hallway Points, size, and the map which is char pointer sizes of 80*21
 
+ProfileManager
+Provide functionality of saving a dungeon and loading a dungeon.
+The file is save and load from your home dictionary/.rlg327/dungeon.
+how you perform load or save or both is pass arguments to the program :
+save ->  	--save 
+load ->		--load
+When you pass both load and save flag in, the program will always load the file then save it. 
+The order of how you pass in doesnt matter.
+ 

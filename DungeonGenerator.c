@@ -13,51 +13,117 @@
 #define TOTAL_ROOM_AREA_BASE 20
 #define TOTAL_ROOM_AREA_RANDOM 10
 
-MapInfo GenerateNewMap()
+MapInfo* CreateNewMapInfo()
 {
-    int i;
-    srand(time(NULL));
-    char *map = (char*) malloc(HEIGHT * WIDTH * sizeof(char));
-
-	MapInfo mapInfo;
-	mapInfo.numsRoom = rand() % NUMS_ROOM_RANDOM + NUMS_ROOM_BASE;
-    Room *rooms = (Room*) malloc(mapInfo.numsRoom * sizeof(Room));
-	Point *hallwayPoint = (Point*)malloc(mapInfo.numsRoom/3+1 * sizeof(Point));
-	int totalRoomArea = (rand() % TOTAL_ROOM_AREA_RANDOM + TOTAL_ROOM_AREA_BASE) * WIDTH * HEIGHT / 100;
-	int AvgArea = totalRoomArea / mapInfo.numsRoom;
-
-
-	mapInfo.HallwayPoints = hallwayPoint;
-	mapInfo.rooms = rooms;
-	mapInfo.size.dx = WIDTH;
-	mapInfo.size.dy = HEIGHT;
-	mapInfo.map = map;
-
-	for (i = 0; i< HEIGHT * WIDTH; i++)
+	int i;
+	MapInfo *newMapInfo = (MapInfo*)malloc(sizeof(MapInfo));
+	newMapInfo->map = (char*)malloc(HEIGHT * WIDTH * sizeof(char));
+	for(i=0; i< HEIGHT * WIDTH; i++)
 	{
-		map[i] = ' ';
+		newMapInfo->map[i] = ' ';
+		newMapInfo->hardness[i] = 0;
 	}
-    for(i=0; i< mapInfo.numsRoom; i++)
-    {
-        rooms[i].topLeft.x = 255;
-		rooms[i].topLeft.y = 255;
-    }
-
-    for(i=0; i < mapInfo.numsRoom; i++)
-    {
-        rooms[i].size.dx = (int) sqrt((double) ((rand() % 13) * AvgArea / 10)) + 3;
-        rooms[i].size.dy = (int) sqrt((double) ((rand() % 13) * AvgArea / 10)) + 3;
-		rooms[i].floor = (Point *)malloc(rooms[i].size.dx * rooms[i].size.dy * sizeof(Point));
-		placeRoom(map, &rooms[i]);
-    }
-
+	newMapInfo->numsRoom = 0;
+	newMapInfo->playerPosition.x = 1;
+	newMapInfo->playerPosition.y = 1;
+	newMapInfo->size.dx = WIDTH;
+	newMapInfo->size.dy = HEIGHT;
+	newMapInfo->rooms = NULL;
 	
-	cleanInvalidRoom(&mapInfo);
 
+	return newMapInfo;
+}
+
+Room* CreateNewRooms(int nums)
+{
+	Room *rooms = (Room*)malloc(nums * sizeof(Room));
+	int i;
+	for(i=0; i<nums; i++)
+	{
+		rooms[i].topLeft.x = 255;
+		rooms[i].topLeft.y = 255;
+		rooms[i].size.dx = 0;
+		rooms[i].size.dy = 0;
+	}
+
+	return rooms;
+}
+
+
+MapInfo* GenerateNewMap()
+{
+	int i;
+	MapInfo *mapInfo = CreateNewMapInfo();
+
+	mapInfo->numsRoom = rand() % NUMS_ROOM_RANDOM + NUMS_ROOM_BASE;
+    mapInfo->rooms = CreateNewRooms(mapInfo->numsRoom);
+
+	mapInfo->size.dx = WIDTH;
+	mapInfo->size.dy = HEIGHT;
+	mapInfo->playerPosition.x = 1;
+	mapInfo->playerPosition.y = 1;
+
+	int totalRoomArea = (rand() % TOTAL_ROOM_AREA_RANDOM + TOTAL_ROOM_AREA_BASE) * WIDTH * HEIGHT / 100;
+	int AvgArea = totalRoomArea / mapInfo->numsRoom;
+	
+    for(i=0; i < mapInfo->numsRoom; i++)
+    {
+        mapInfo->rooms[i].size.dx = (unsigned char) sqrt((double) ((rand() % 13) * AvgArea / 10)) + 3;
+        mapInfo->rooms[i].size.dy = (unsigned char) sqrt((double) ((rand() % 13) * AvgArea / 10)) + 3;
+		placeRoom(mapInfo->map, &mapInfo->rooms[i]);
+    }
+
+	cleanInvalidRoom(mapInfo);
 	generateHallway(mapInfo);
-	printHallway(map);
+	updateHardness(mapInfo);
 
 	return mapInfo;
+}
+
+void printHardness(MapInfo *mapInfo)
+{
+	int i, j;
+	printf("----------------------------------------------------------------------------------\n");
+	for (i = 0; i<HEIGHT; i++)
+	{
+		printf("|");
+		for (j = 0; j<WIDTH; j++)
+		{
+			int print = 0;
+			if (mapInfo->hardness[i * WIDTH + j] == 255)
+				print = 2;
+			else if (mapInfo->hardness[i * WIDTH + j] > 0)
+				print = 1;
+			printf("%d", print);
+		}
+		printf("|\n");
+	}
+	printf("----------------------------------------------------------------------------------\n");
+}
+
+void updateHardness(MapInfo *mapInfo)
+{
+	int i = 0;
+	for (; i < 80 * 21; i++)
+	{
+		switch (mapInfo->map[i])
+		{
+			case ' ':
+				mapInfo->hardness[i] = rand()%253 + 1;
+				break;
+			case '#':
+				mapInfo->hardness[i] = 0;
+				break;
+			case '.':
+				mapInfo->hardness[i] = 0;
+
+			default:
+				mapInfo->hardness[i] = 0;
+		}
+
+		if ((i + 1) % 80 < 2 || i <80 || i>= 80*20)
+			mapInfo->hardness[i] = 255;
+	}
 }
 
 void cleanInvalidRoom(MapInfo *mapInfo)
@@ -78,22 +144,22 @@ void cleanInvalidRoom(MapInfo *mapInfo)
 	mapInfo->numsRoom = count;
 }
 
-void generateHallway(MapInfo mapInfo)
+void generateHallway(MapInfo *mapInfo)
 {
 	int i;
 	//printf("Numbers of Room: %d\n", mapInfo.numsRoom);
 	Point RoomPoint[4];
-	for (i = 0; i < mapInfo.numsRoom;i++)
+	for (i = 0; i < mapInfo->numsRoom;i++)
 	{
 		//printf("Room %d, x: %d, y: %d\n", i, mapInfo.rooms[i].topLeft.x, mapInfo.rooms[i].topLeft.y);
 
-		findRoomRandomPoint(mapInfo.rooms[i], &RoomPoint[0]);
-		findRoomRandomPoint(mapInfo.rooms[i], &RoomPoint[1]);
-		findRoomRandomPoint(mapInfo.rooms[(i + 1) % mapInfo.numsRoom], &RoomPoint[2]);
-		findRoomRandomPoint(mapInfo.rooms[(i + 2) % mapInfo.numsRoom], &RoomPoint[3]);
+		findRoomRandomPoint(mapInfo->rooms[i], &RoomPoint[0]);
+		findRoomRandomPoint(mapInfo->rooms[i], &RoomPoint[1]);
+		findRoomRandomPoint(mapInfo->rooms[(i + 1) % mapInfo->numsRoom], &RoomPoint[2]);
+		findRoomRandomPoint(mapInfo->rooms[(i + 2) % mapInfo->numsRoom], &RoomPoint[3]);
 
 		//printf("Hallway Point %d: (%d, %d) to (%d,%d)\n",i, RoomPoint[0].x, RoomPoint[0].y, RoomPoint[2].x, RoomPoint[2].y);
-		placeHallway(mapInfo.map, RoomPoint[0], RoomPoint[2]);
+		placeHallway(mapInfo->map, RoomPoint[0], RoomPoint[2]);
 		// if (i % 3 == 0)
 			//placeHallway(mapInfo.map, RoomPoint[1], RoomPoint[3]);
 	}
@@ -125,8 +191,8 @@ void printHallway(char *map)
 
 void placeHallway(char *map, Point start, Point end)
 {
-	int current_x = start.x;
-	int current_y = start.y;
+	unsigned char current_x = start.x;
+	unsigned char current_y = start.y;
 	int random = 0;
 	int i;
 
@@ -175,17 +241,9 @@ void placeRoom(char* map, Room *room)
         counter ++;
         if(CheckEnoughRoom(map, start, room[0].size) == 1)
         {
-			room[0].topLeft = start;
-
-			Size min;
-
-            for(i=0; i<room[0].size.dy; i++)
-            {
-                for (j = 0; j < room[0].size.dx; j++)
-                {
-                    map[(start.y + i)*WIDTH + start.x + j] = '.';
-                }
-            }
+			room->topLeft = start;
+			
+			placeRoomWorker(map, room);
 
             break;
         }
@@ -200,6 +258,19 @@ void placeRoom(char* map, Room *room)
             return;
         }
     }
+}
+
+void placeRoomWorker(char* map, Room *room)
+{
+	int i, j;
+
+	for (i = 0; i<room->size.dy; i++)
+	{
+		for (j = 0; j < room[0].size.dx; j++)
+		{
+			map[(room->topLeft.y + i)*WIDTH + room->topLeft.x + j] = '.';
+		}
+	}
 }
 
 int CheckEnoughRoom(char *map, Point start, Size size)
