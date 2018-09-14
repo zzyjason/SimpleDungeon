@@ -30,9 +30,13 @@ void LoadProfile(MapInfo *mapInfo)
 
 	int fileVersion = 0;
 	fread(&fileVersion, sizeof(int), 1, file);
+	fileVersion = be32toh(fileVersion);
 
 	int fileSize = 0;
 	fread(&fileSize, sizeof(int), 1, file);
+	fileSize = be32toh(fileSize);
+
+	printf("%d, %d\n", fileVersion, fileSize);
 
 	Point PlayerPosition;
 	fread(&PlayerPosition.x, 1, 1, file);
@@ -51,6 +55,7 @@ void LoadProfile(MapInfo *mapInfo)
 		fread(&mapInfo->rooms[i].topLeft.y, 1, 1, file);
 		fread(&mapInfo->rooms[i].size.dx, 1, 1, file);
 		fread(&mapInfo->rooms[i].size.dy, 1, 1, file);
+		//printf("%d,%d,%d,%d\n", mapInfo->rooms[i].topLeft.x, mapInfo->rooms[i].topLeft.y, mapInfo->rooms[i].size.dx, mapInfo->rooms[i].size.dy);
 		placeRoomWorker(mapInfo->map, &mapInfo->rooms[i]);
 	}
 
@@ -75,11 +80,12 @@ void SaveProfile(MapInfo *mapInfo)
 		CreatProfileDir();
 
 	FILE *file = fopen(profile, "w");
-	int fileVersion = htobe32(0);
-	
-	
+	int fileVersion = htobe32(555);
 	
 	int fileSize = 1702 + ((int)mapInfo->numsRoom) * 4;
+	fileSize = htobe32(fileSize);
+
+
 	fprintf(file, "RLG327-F2018");
 	fwrite(&fileVersion, sizeof(int), 1, file);
 	fwrite(&fileSize, sizeof(int), 1, file);
