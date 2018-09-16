@@ -167,10 +167,8 @@ void generateHallway(MapInfo *mapInfo)
 
 void findRoomRandomPoint(Room room, Point *point)
 {
-
 	point->x = rand() % room.size.dx + room.topLeft.x;
 	point->y = rand() % room.size.dy + room.topLeft.y;
-	
 }
 
 void printHallway(char *map)
@@ -281,7 +279,7 @@ int CheckEnoughRoom(char *map, Point start, Size size)
         for(j=0; j<size.dx; j++)
         {
             current = (start.y + i)*WIDTH + start.x + j;
-            if(start.y+i >= 20 || start.x +j >= 79 || start.y+i <= 0 || start.x+j <= 0 || map[current] != ' ' || map[current -1] != ' ' || map[current + 1] != ' ' || map[current + WIDTH] != ' ' || map[current-WIDTH] != ' ' || map[current - WIDTH + 1] != ' ' || map[current - WIDTH - 1] != ' ' || map[current + WIDTH + 1] != ' ' || map[current + WIDTH - 1] != ' ')
+            if(start.y+i >= 20 || start.x+j >= 79 || start.y+i <= 0 || start.x+j <= 0 || map[current] != ' ' || map[current -1] != ' ' || map[current + 1] != ' ' || map[current + WIDTH] != ' ' || map[current-WIDTH] != ' ' || map[current - WIDTH + 1] != ' ' || map[current - WIDTH - 1] != ' ' || map[current + WIDTH + 1] != ' ' || map[current + WIDTH - 1] != ' ')
             {
                 return 0;
             }

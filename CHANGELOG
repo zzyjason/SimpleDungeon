@@ -12,3 +12,6 @@ Start Implementing ProfileManager
 9/12/2018
 Finish Implementing profileManager
 Added helper function for create new mapInfo
+
+9/13/2018
+Fix Endian Read and Write issue with little endian cpu

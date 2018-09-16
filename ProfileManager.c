@@ -55,7 +55,6 @@ void LoadProfile(MapInfo *mapInfo)
 		fread(&mapInfo->rooms[i].topLeft.y, 1, 1, file);
 		fread(&mapInfo->rooms[i].size.dx, 1, 1, file);
 		fread(&mapInfo->rooms[i].size.dy, 1, 1, file);
-		//printf("%d,%d,%d,%d\n", mapInfo->rooms[i].topLeft.x, mapInfo->rooms[i].topLeft.y, mapInfo->rooms[i].size.dx, mapInfo->rooms[i].size.dy);
 		placeRoomWorker(mapInfo->map, &mapInfo->rooms[i]);
 	}
 
