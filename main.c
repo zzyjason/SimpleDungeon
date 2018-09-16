@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 	if (saveFlag)
 	    SaveProfile(mapInfo);
 
-	printHallway(mapInfo->map);
+	printHallway(mapInfo);
 
 
 	free(mapInfo->map);

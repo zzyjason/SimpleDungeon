@@ -38,7 +38,7 @@ typedef struct
 
 MapInfo* GenerateNewMap();
 void generateHallway(MapInfo *mapInfo);
-void printHallway(char *map);
+void printHallway(MapInfo *mapInfo);
 void placeHallway(char *map, Point start, Point end);
 void placeRoom(char* map, Room *room);
 int CheckEnoughRoom(char *map, Point start, Size size);
@@ -49,5 +49,9 @@ void printHardness(MapInfo *mapInfo);
 void placeRoomWorker(char* map, Room *room);
 Room* CreateNewRooms(int nums);
 MapInfo* CreateNewMapInfo();
+int PointToIndex(Point *point, int x, int y);
+Point IndexToPoint(int index);
+void generatePlayerPosition(MapInfo *mapInfo);
+
 
 #endif 

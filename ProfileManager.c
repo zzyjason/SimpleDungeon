@@ -59,8 +59,8 @@ void LoadProfile(MapInfo *mapInfo)
 	}
 
 	fclose(file);
-
 	loadHallway(mapInfo);
+	mapInfo->map[PointToIndex(&mapInfo->playerPosition, 0, 0)] = '@';
 }
 
 void loadHallway(MapInfo *mapInfo)

@@ -75,6 +75,7 @@ MapInfo* GenerateNewMap()
 
 	cleanInvalidRoom(mapInfo);
 	generateHallway(mapInfo);
+	generatePlayerPosition(mapInfo);
 	updateHardness(mapInfo);
 
 	return mapInfo;
@@ -90,9 +91,9 @@ void printHardness(MapInfo *mapInfo)
 		for (j = 0; j<WIDTH; j++)
 		{
 			int print = 0;
-			if (mapInfo->hardness[i * WIDTH + j] == 255)
+			if (mapInfo->hardness[PointToIndex(NULL, j, i)] == 255)
 				print = 2;
-			else if (mapInfo->hardness[i * WIDTH + j] > 0)
+			else if (mapInfo->hardness[PointToIndex(NULL, j, i)] > 0)
 				print = 1;
 			printf("%d", print);
 		}
@@ -116,7 +117,8 @@ void updateHardness(MapInfo *mapInfo)
 				break;
 			case '.':
 				mapInfo->hardness[i] = 0;
-
+			case '@':
+				mapInfo->hardness[i] = 0;
 			default:
 				mapInfo->hardness[i] = 0;
 		}
@@ -144,11 +146,19 @@ void cleanInvalidRoom(MapInfo *mapInfo)
 	mapInfo->numsRoom = count;
 }
 
+void generatePlayerPosition(MapInfo *mapInfo)
+{
+	int RandomRoomPlayerIn = rand() % mapInfo->numsRoom - 1;
+	findRoomRandomPoint(mapInfo->rooms[RandomRoomPlayerIn], &mapInfo->playerPosition);
+	mapInfo->map[PointToIndex(&mapInfo->playerPosition, 0, 0)] = '@';
+}
+
 void generateHallway(MapInfo *mapInfo)
 {
 	int i;
 	//printf("Numbers of Room: %d\n", mapInfo.numsRoom);
 	Point RoomPoint[4];
+
 	for (i = 0; i < mapInfo->numsRoom;i++)
 	{
 		//printf("Room %d, x: %d, y: %d\n", i, mapInfo.rooms[i].topLeft.x, mapInfo.rooms[i].topLeft.y);
@@ -171,7 +181,7 @@ void findRoomRandomPoint(Room room, Point *point)
 	point->y = rand() % room.size.dy + room.topLeft.y;
 }
 
-void printHallway(char *map)
+void printHallway(MapInfo *mapInfo)
 {
 	int i, j;
 	printf("----------------------------------------------------------------------------------\n");
@@ -180,11 +190,26 @@ void printHallway(char *map)
 		printf("|");
 		for (j = 0; j<WIDTH; j++)
 		{
-			printf("%c", map[i * WIDTH + j]);
+			printf("%c", mapInfo->map[PointToIndex(NULL, j, i)]);
 		}
 		printf("|\n");
 	}
 	printf("----------------------------------------------------------------------------------\n");
+}
+
+int PointToIndex(Point* point, int x, int y)
+{
+	if(point != NULL)
+		return WIDTH * point->y + point->x;
+	return WIDTH * y + x;
+}
+
+Point IndexToPoint(int index)
+{
+	Point newPoint;
+	newPoint.x = index % WIDTH;
+	newPoint.y = index / WIDTH;
+	return newPoint;
 }
 
 void placeHallway(char *map, Point start, Point end)
@@ -204,9 +229,9 @@ void placeHallway(char *map, Point start, Point end)
 			else if (current_x - end.x < 0)
 				current_x++;
 
-			if (map[current_y*WIDTH + current_x] == ' ')
-				map[current_y*WIDTH + current_x] = '#';
-			else if (map[current_y*WIDTH + current_x] == '#')
+			if (map[PointToIndex(NULL, current_x, current_y)] == ' ')
+				map[PointToIndex(NULL, current_x, current_y)] = '#';
+			else if (map[PointToIndex(NULL, current_x, current_y)] == '#')
 				break;
 		}
 
@@ -218,9 +243,9 @@ void placeHallway(char *map, Point start, Point end)
 			else if (current_y - end.y < 0)
 				current_y++;
 
-			if (map[current_y*WIDTH + current_x] == ' ')
-				map[current_y*WIDTH + current_x] = '#';
-			else if (map[current_y*WIDTH + current_x] == '#')
+			if (map[PointToIndex(NULL, current_x, current_y)] == ' ')
+				map[PointToIndex(NULL, current_x, current_y)] = '#';
+			else if (map[PointToIndex(NULL, current_x, current_y)] == '#')
 				break;
 		}
 	}
@@ -237,7 +262,7 @@ void placeRoom(char* map, Room *room)
     while(1)
     {
         counter ++;
-        if(CheckEnoughRoom(map, start, room[0].size) == 1)
+        if(CheckEnoughRoom(map, start, room->size) == 1)
         {
 			room->topLeft = start;
 			
@@ -264,9 +289,9 @@ void placeRoomWorker(char* map, Room *room)
 
 	for (i = 0; i<room->size.dy; i++)
 	{
-		for (j = 0; j < room[0].size.dx; j++)
+		for (j = 0; j < room->size.dx; j++)
 		{
-			map[(room->topLeft.y + i)*WIDTH + room->topLeft.x + j] = '.';
+			map[PointToIndex(NULL, room->topLeft.x + j, room->topLeft.y + i)] = '.';
 		}
 	}
 }
@@ -278,7 +303,8 @@ int CheckEnoughRoom(char *map, Point start, Size size)
     {
         for(j=0; j<size.dx; j++)
         {
-            current = (start.y + i)*WIDTH + start.x + j;
+			
+            current = PointToIndex(NULL, start.x + j, (start.y + i));
             if(start.y+i >= 20 || start.x+j >= 79 || start.y+i <= 0 || start.x+j <= 0 || map[current] != ' ' || map[current -1] != ' ' || map[current + 1] != ' ' || map[current + WIDTH] != ' ' || map[current-WIDTH] != ' ' || map[current - WIDTH + 1] != ' ' || map[current - WIDTH - 1] != ' ' || map[current + WIDTH + 1] != ' ' || map[current + WIDTH - 1] != ' ')
             {
                 return 0;
