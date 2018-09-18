@@ -3,6 +3,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "main.h"
+#include "Path.h"
 
 #include "DungeonGenerator.h"
 #include "ProfileManager.h"
@@ -40,6 +42,10 @@ int main(int argc, char **argv)
 	    SaveProfile(mapInfo);
 
 	printHallway(mapInfo);
+	printHardness(mapInfo);
+	UpdatePath(mapInfo);
+
+
 
 
 	free(mapInfo->map);

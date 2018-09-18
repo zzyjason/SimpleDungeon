@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "DungeonGenerator.h"
+
 #include <string.h>
 
 #define HEIGHT 21
@@ -22,6 +23,9 @@ MapInfo* CreateNewMapInfo()
 	{
 		newMapInfo->map[i] = ' ';
 		newMapInfo->hardness[i] = 0;
+		newMapInfo->TunnelPath.Distance[i] = 65535;
+		newMapInfo->nonTunnelPath.Distance[i] = 65535;
+		
 	}
 	newMapInfo->numsRoom = 0;
 	newMapInfo->playerPosition.x = 1;
@@ -30,6 +34,7 @@ MapInfo* CreateNewMapInfo()
 	newMapInfo->size.dy = HEIGHT;
 	newMapInfo->rooms = NULL;
 	
+
 
 	return newMapInfo;
 }
@@ -91,10 +96,10 @@ void printHardness(MapInfo *mapInfo)
 		for (j = 0; j<WIDTH; j++)
 		{
 			int print = 0;
-			if (mapInfo->hardness[PointToIndex(NULL, j, i)] == 255)
-				print = 2;
-			else if (mapInfo->hardness[PointToIndex(NULL, j, i)] > 0)
-				print = 1;
+			if (mapInfo->hardness[CoordinatesToIndex(j, i)] == 255)
+				print = 9;
+			else if (mapInfo->hardness[CoordinatesToIndex(j, i)] > 0)
+				print = mapInfo->hardness[CoordinatesToIndex(j, i)]/85 + 1;
 			printf("%d", print);
 		}
 		printf("|\n");
@@ -150,7 +155,7 @@ void generatePlayerPosition(MapInfo *mapInfo)
 {
 	int RandomRoomPlayerIn = rand() % mapInfo->numsRoom - 1;
 	findRoomRandomPoint(mapInfo->rooms[RandomRoomPlayerIn], &mapInfo->playerPosition);
-	mapInfo->map[PointToIndex(&mapInfo->playerPosition, 0, 0)] = '@';
+	mapInfo->map[PointToIndex(&mapInfo->playerPosition)] = '@';
 }
 
 void generateHallway(MapInfo *mapInfo)
@@ -190,17 +195,22 @@ void printHallway(MapInfo *mapInfo)
 		printf("|");
 		for (j = 0; j<WIDTH; j++)
 		{
-			printf("%c", mapInfo->map[PointToIndex(NULL, j, i)]);
+			printf("%c", mapInfo->map[CoordinatesToIndex(j, i)]);
 		}
 		printf("|\n");
 	}
 	printf("----------------------------------------------------------------------------------\n");
 }
 
-int PointToIndex(Point* point, int x, int y)
+int PointToIndex(Point* point)
 {
-	if(point != NULL)
-		return WIDTH * point->y + point->x;
+
+	return WIDTH * point->y + point->x;
+
+}
+
+int CoordinatesToIndex(int x, int y)
+{
 	return WIDTH * y + x;
 }
 
@@ -229,9 +239,9 @@ void placeHallway(char *map, Point start, Point end)
 			else if (current_x - end.x < 0)
 				current_x++;
 
-			if (map[PointToIndex(NULL, current_x, current_y)] == ' ')
-				map[PointToIndex(NULL, current_x, current_y)] = '#';
-			else if (map[PointToIndex(NULL, current_x, current_y)] == '#')
+			if (map[CoordinatesToIndex(current_x, current_y)] == ' ')
+				map[CoordinatesToIndex(current_x, current_y)] = '#';
+			else if (map[CoordinatesToIndex(current_x, current_y)] == '#')
 				break;
 		}
 
@@ -243,9 +253,9 @@ void placeHallway(char *map, Point start, Point end)
 			else if (current_y - end.y < 0)
 				current_y++;
 
-			if (map[PointToIndex(NULL, current_x, current_y)] == ' ')
-				map[PointToIndex(NULL, current_x, current_y)] = '#';
-			else if (map[PointToIndex(NULL, current_x, current_y)] == '#')
+			if (map[CoordinatesToIndex(current_x, current_y)] == ' ')
+				map[CoordinatesToIndex(current_x, current_y)] = '#';
+			else if (map[CoordinatesToIndex(current_x, current_y)] == '#')
 				break;
 		}
 	}
@@ -291,7 +301,7 @@ void placeRoomWorker(char* map, Room *room)
 	{
 		for (j = 0; j < room->size.dx; j++)
 		{
-			map[PointToIndex(NULL, room->topLeft.x + j, room->topLeft.y + i)] = '.';
+			map[CoordinatesToIndex(room->topLeft.x + j, room->topLeft.y + i)] = '.';
 		}
 	}
 }
@@ -304,7 +314,7 @@ int CheckEnoughRoom(char *map, Point start, Size size)
         for(j=0; j<size.dx; j++)
         {
 			
-            current = PointToIndex(NULL, start.x + j, (start.y + i));
+            current = CoordinatesToIndex(start.x + j, (start.y + i));
             if(start.y+i >= 20 || start.x+j >= 79 || start.y+i <= 0 || start.x+j <= 0 || map[current] != ' ' || map[current -1] != ' ' || map[current + 1] != ' ' || map[current + WIDTH] != ' ' || map[current-WIDTH] != ' ' || map[current - WIDTH + 1] != ' ' || map[current - WIDTH - 1] != ' ' || map[current + WIDTH + 1] != ' ' || map[current + WIDTH - 1] != ' ')
             {
                 return 0;

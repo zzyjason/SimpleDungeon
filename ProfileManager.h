@@ -1,5 +1,7 @@
-#ifndef PROFILE_MANAGER
-#define PROFILE_MANAGER
+#ifndef PROFILE_MANAGER_H_
+#define PROFILE_MANAGER_H_
+
+#include "main.h"
 
 void CreatProfileDir();
 void GetProfileDir();

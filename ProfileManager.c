@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 
+
 #include "DungeonGenerator.h"
 #include "ProfileManager.h"
 
@@ -36,11 +37,8 @@ void LoadProfile(MapInfo *mapInfo)
 	fread(&fileSize, sizeof(int), 1, file);
 	fileSize = be32toh(fileSize);
 
-	printf("%d, %d\n", fileVersion, fileSize);
-
-	Point PlayerPosition;
-	fread(&PlayerPosition.x, 1, 1, file);
-	fread(&PlayerPosition.y, 1, 1, file);
+	fread(&mapInfo->playerPosition.x, 1, 1, file);
+	fread(&mapInfo->playerPosition.y, 1, 1, file);
 	fread(&mapInfo->hardness, 1, 80 * 21, file);
 
 	int BytesToRead = fileSize - ftell(file);
@@ -60,7 +58,7 @@ void LoadProfile(MapInfo *mapInfo)
 
 	fclose(file);
 	loadHallway(mapInfo);
-	mapInfo->map[PointToIndex(&mapInfo->playerPosition, 0, 0)] = '@';
+	mapInfo->map[PointToIndex(&mapInfo->playerPosition)] = '@';
 }
 
 void loadHallway(MapInfo *mapInfo)

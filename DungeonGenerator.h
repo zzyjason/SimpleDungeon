@@ -1,40 +1,7 @@
 #ifndef DUNGEONGENERATOR_H_   
 #define DUNGEONGENERATOR_H_
 
-typedef struct
-{
-	unsigned char x;
-	unsigned char y;
-}Point;
-
-typedef struct
-{
-	Point Position;
-	unsigned char Hardness;
-}Block;
-
-typedef struct
-{
-	unsigned char dx;
-	unsigned char dy;
-
-}Size;
-
-typedef struct
-{
-	Point topLeft;
-	Size size;
-}Room;
-
-typedef struct
-{
-	Room *rooms;
-	unsigned char numsRoom;
-	Size size;
-	char *map; 
-	unsigned char hardness[80*21];
-	Point playerPosition;
-}MapInfo;
+#include "main.h"
 
 MapInfo* GenerateNewMap();
 void generateHallway(MapInfo *mapInfo);
@@ -49,9 +16,9 @@ void printHardness(MapInfo *mapInfo);
 void placeRoomWorker(char* map, Room *room);
 Room* CreateNewRooms(int nums);
 MapInfo* CreateNewMapInfo();
-int PointToIndex(Point *point, int x, int y);
+int PointToIndex(Point* point);
 Point IndexToPoint(int index);
 void generatePlayerPosition(MapInfo *mapInfo);
-
+int CoordinatesToIndex(int x, int y);
 
 #endif 
