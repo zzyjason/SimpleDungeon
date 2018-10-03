@@ -20,3 +20,10 @@ load ->		--load
 When you pass both load and save flag in, the program will always load the file then save it. 
 The order of how you pass in doesnt matter.
  
+Path
+Find the shortest path from any point in the dungeon to current PC position. 
+where it provides two mode, 
+mode with no tunnle which only finds the path that PC can go without tunnleing.
+mode with tunnle which finds all the path. With tunnleing cost is hardness of the block / 85. 
+it is provided in functions in path. 
+there is also a print path funtcion which print out the path for tunnle and notunnle.

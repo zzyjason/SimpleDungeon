@@ -9,10 +9,21 @@
 
 void UpdatePath(MapInfo *mapInfo)
 {
-	PathWalker(mapInfo, mapInfo->playerPosition, mapInfo->playerPosition, 0);
-	PathWalker(mapInfo, mapInfo->playerPosition, mapInfo->playerPosition, 1);
-	printPath(mapInfo);
+	PathWalker(mapInfo, mapInfo->Player.Position, mapInfo->Player.Position, 0);
+	PathWalker(mapInfo, mapInfo->Player.Position, mapInfo->Player.Position, 1);
+	int i;
+	for (i = 0; i < 80 * 21; i++)
+	{
+		if (mapInfo->TunnelPath.Distance[i] != 65535 && mapInfo->TunnelPath.Distance[i] != 0)
+		{
+			mapInfo->TunnelPath.Distance[i] -= mapInfo->hardness[i] / 85;
+		}
+
+	}
+
+
 }
+
 
 void PathWalker(MapInfo *mapInfo, Point Des, Point Src, int Tunnel)
 {
@@ -47,7 +58,6 @@ void PathWalker(MapInfo *mapInfo, Point Des, Point Src, int Tunnel)
 				mapInfo->TunnelPath.ShortestPath[desIndex] = Src;
 				flag = 1;
 			}
-			
 		}
 		else
 		{

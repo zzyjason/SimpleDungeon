@@ -8,6 +8,8 @@
 
 #include "DungeonGenerator.h"
 #include "ProfileManager.h"
+#include "Heap.h"
+#include "TurnManger.h"
 
 
 int main(int argc, char **argv)
@@ -16,7 +18,8 @@ int main(int argc, char **argv)
 
 	int loadFlag = 0;
 	int saveFlag = 0;
-	int i;
+	int i,j;
+	int numMon = rand() % 5 + 8;
 
 	for (i = 0; i < argc; i++)
 	{
@@ -24,8 +27,21 @@ int main(int argc, char **argv)
 			saveFlag = 1;
 		else if (strcmp(argv[i], "--load") == 0)
 			loadFlag = 1;
+		else if (strcmp(argv[i], "--nummon") == 0 && i + 1 < argc)
+		{
+			numMon = 0;
+			for (j = 0; j < strlen(argv[i + 1]); j++)
+			{
+				if (argv[i + 1][j] > 47 && argv[i + 1][j] < 58)
+					numMon = numMon * 10 + argv[i + 1][j] - 48;
+				else
+				{
+					numMon = rand() % 5 + 8;
+					break;
+				}
+			}
+		}
 	}
-
 
 	MapInfo *mapInfo = NULL;
 
@@ -41,15 +57,25 @@ int main(int argc, char **argv)
 	if (saveFlag)
 	    SaveProfile(mapInfo);
 
-	printHallway(mapInfo);
-	printHardness(mapInfo);
+	mapInfo->numMonster = numMon;
+	GenerateMonster(mapInfo);
+	placeAllPlayerPosition(mapInfo);
+
 	UpdatePath(mapInfo);
 
+	printHallway(mapInfo);
+	//printHardness(mapInfo);
+	//printPath(mapInfo);
 
+	unsigned int round = 0;
+
+	Heap* turn = CreateTurnManager(mapInfo);
 
 
 	free(mapInfo->map);
 	free(mapInfo->rooms);
+	free(mapInfo->Monsters);
+	free(mapInfo);
     return 0;
 }
 

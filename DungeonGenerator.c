@@ -6,6 +6,7 @@
 
 #include <string.h>
 
+
 #define HEIGHT 21
 #define WIDTH 80
 
@@ -28,14 +29,16 @@ MapInfo* CreateNewMapInfo()
 		
 	}
 	newMapInfo->numsRoom = 0;
-	newMapInfo->playerPosition.x = 1;
-	newMapInfo->playerPosition.y = 1;
+	newMapInfo->Player.Position.x = 1;
+	newMapInfo->Player.Position.y = 1;
+	newMapInfo->Player.status = 1;
+	newMapInfo->Player.PCType = 16;
+	newMapInfo->Player.speed = 10;
+
 	newMapInfo->size.dx = WIDTH;
 	newMapInfo->size.dy = HEIGHT;
 	newMapInfo->rooms = NULL;
 	
-
-
 	return newMapInfo;
 }
 
@@ -65,8 +68,8 @@ MapInfo* GenerateNewMap()
 
 	mapInfo->size.dx = WIDTH;
 	mapInfo->size.dy = HEIGHT;
-	mapInfo->playerPosition.x = 1;
-	mapInfo->playerPosition.y = 1;
+	mapInfo->Player.Position.x = 1;
+	mapInfo->Player.Position.y = 1;
 
 	int totalRoomArea = (rand() % TOTAL_ROOM_AREA_RANDOM + TOTAL_ROOM_AREA_BASE) * WIDTH * HEIGHT / 100;
 	int AvgArea = totalRoomArea / mapInfo->numsRoom;
@@ -80,7 +83,7 @@ MapInfo* GenerateNewMap()
 
 	cleanInvalidRoom(mapInfo);
 	generateHallway(mapInfo);
-	generatePlayerPosition(mapInfo);
+
 	updateHardness(mapInfo);
 
 	return mapInfo;
@@ -151,37 +154,32 @@ void cleanInvalidRoom(MapInfo *mapInfo)
 	mapInfo->numsRoom = count;
 }
 
-void generatePlayerPosition(MapInfo *mapInfo)
-{
-	int RandomRoomPlayerIn = rand() % mapInfo->numsRoom - 1;
-	findRoomRandomPoint(mapInfo->rooms[RandomRoomPlayerIn], &mapInfo->playerPosition);
-	mapInfo->map[PointToIndex(&mapInfo->playerPosition)] = '@';
-}
+
 
 void generateHallway(MapInfo *mapInfo)
 {
 	int i;
-	//printf("Numbers of Room: %d\n", mapInfo.numsRoom);
-	Point RoomPoint[4];
+
+	Point RoomPoint[2];
 
 	for (i = 0; i < mapInfo->numsRoom;i++)
 	{
-		//printf("Room %d, x: %d, y: %d\n", i, mapInfo.rooms[i].topLeft.x, mapInfo.rooms[i].topLeft.y);
-
 		findRoomRandomPoint(mapInfo->rooms[i], &RoomPoint[0]);
-		findRoomRandomPoint(mapInfo->rooms[i], &RoomPoint[1]);
-		findRoomRandomPoint(mapInfo->rooms[(i + 1) % mapInfo->numsRoom], &RoomPoint[2]);
-		findRoomRandomPoint(mapInfo->rooms[(i + 2) % mapInfo->numsRoom], &RoomPoint[3]);
+		findRoomRandomPoint(mapInfo->rooms[(i + 1) % mapInfo->numsRoom], &RoomPoint[1]);
 
-		//printf("Hallway Point %d: (%d, %d) to (%d,%d)\n",i, RoomPoint[0].x, RoomPoint[0].y, RoomPoint[2].x, RoomPoint[2].y);
-		placeHallway(mapInfo->map, RoomPoint[0], RoomPoint[2]);
-		// if (i % 3 == 0)
-			//placeHallway(mapInfo.map, RoomPoint[1], RoomPoint[3]);
+		placeHallway(mapInfo->map, RoomPoint[0], RoomPoint[1]);
 	}
 }
 
 void findRoomRandomPoint(Room room, Point *point)
 {
+	if (room.size.dx == 0 || room.size.dy == 0)
+	{
+		point->x = -1;
+		point->y = -1;
+		return;
+	}
+
 	point->x = rand() % room.size.dx + room.topLeft.x;
 	point->y = rand() % room.size.dy + room.topLeft.y;
 }
@@ -322,4 +320,58 @@ int CheckEnoughRoom(char *map, Point start, Size size)
         }
     }
     return 1;
+}
+
+
+void GenerateMonster(MapInfo *mapInfo)
+{
+	int i, j;
+
+	mapInfo->Monsters = (PC *)malloc(sizeof(PC) * mapInfo->numMonster);
+	for (i = 0; i < mapInfo->numMonster; i++)
+	{
+		mapInfo->Monsters[i].status = 1;
+		
+		for (j = 0; j < 4; j++)
+			mapInfo->Monsters[i].PCType += rand() % 2 * (int)pow(2, j);
+
+		mapInfo->Monsters[i].speed = rand() % 16 + 5;
+	}
+}
+
+
+int generatePlayerPosition(MapInfo *mapInfo, PC *player, int exclude)
+{
+
+	int RandomRoomPlayerIn;
+
+	do
+	{
+		RandomRoomPlayerIn = rand() % mapInfo->numsRoom;
+		if (exclude == RandomRoomPlayerIn)
+			continue;
+
+		findRoomRandomPoint(mapInfo->rooms[RandomRoomPlayerIn], &(player->Position));
+	} while (mapInfo->map[PointToIndex(&(player->Position))] != '.');
+
+	return RandomRoomPlayerIn;
+}
+
+void placeAllPlayerPosition(MapInfo *mapInfo)
+{
+	int exclude = generatePlayerPosition(mapInfo, &(mapInfo->Player), -1);
+
+	mapInfo->map[PointToIndex(&(mapInfo->Player.Position))] = '@';
+
+	int i;
+	for (i = 0; i < mapInfo->numMonster; i++)
+	{
+		generatePlayerPosition(mapInfo, &mapInfo->Monsters[i], exclude);
+		mapInfo->map[PointToIndex(&(mapInfo->Monsters[i].Position))] = getMonsterSymbol(mapInfo->Monsters[i].PCType);
+	}
+}
+
+char getMonsterSymbol(char MonsterType)
+{
+	return MonsterType % 16 + 65;
 }

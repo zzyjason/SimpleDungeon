@@ -18,7 +18,10 @@ Room* CreateNewRooms(int nums);
 MapInfo* CreateNewMapInfo();
 int PointToIndex(Point* point);
 Point IndexToPoint(int index);
-void generatePlayerPosition(MapInfo *mapInfo);
+int generatePlayerPosition(MapInfo *mapInfo, PC *player, int exclude);
 int CoordinatesToIndex(int x, int y);
+void placeAllPlayerPosition(MapInfo *mapInfo);
+void GenerateMonster(MapInfo *mapInfo);
+char getMonsterSymbol(char MonsterType);
 
 #endif 

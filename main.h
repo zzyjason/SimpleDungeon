@@ -34,14 +34,32 @@ typedef struct
 
 typedef struct
 {
+	Point Position;
+	char PCType;
+	int status;
+	unsigned int speed;
+}PC;
+
+typedef struct
+{
+	PC *Player;
+	unsigned int Round;
+}PCEvent;
+
+typedef struct
+{
 	Room *rooms;
 	unsigned char numsRoom;
 	Size size;
 	char *map;
 	unsigned char hardness[80 * 21];
-	Point playerPosition;
+	PC Player;
 	Path nonTunnelPath;
 	Path TunnelPath;
+	
+	unsigned int numMonster;
+	PC *Monsters;
+
 
 }MapInfo;
 

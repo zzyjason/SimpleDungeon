@@ -37,8 +37,8 @@ void LoadProfile(MapInfo *mapInfo)
 	fread(&fileSize, sizeof(int), 1, file);
 	fileSize = be32toh(fileSize);
 
-	fread(&mapInfo->playerPosition.x, 1, 1, file);
-	fread(&mapInfo->playerPosition.y, 1, 1, file);
+	fread(&mapInfo->Player.Position.x, 1, 1, file);
+	fread(&mapInfo->Player.Position.y, 1, 1, file);
 	fread(&mapInfo->hardness, 1, 80 * 21, file);
 
 	int BytesToRead = fileSize - ftell(file);
@@ -58,7 +58,6 @@ void LoadProfile(MapInfo *mapInfo)
 
 	fclose(file);
 	loadHallway(mapInfo);
-	mapInfo->map[PointToIndex(&mapInfo->playerPosition)] = '@';
 }
 
 void loadHallway(MapInfo *mapInfo)
@@ -86,8 +85,8 @@ void SaveProfile(MapInfo *mapInfo)
 	fprintf(file, "RLG327-F2018");
 	fwrite(&fileVersion, sizeof(int), 1, file);
 	fwrite(&fileSize, sizeof(int), 1, file);
-	fwrite(&mapInfo->playerPosition.x, 1, 1, file);
-	fwrite(&mapInfo->playerPosition.y, 1, 1, file);
+	fwrite(&mapInfo->Player.Position.x, 1, 1, file);
+	fwrite(&mapInfo->Player.Position.y, 1, 1, file);
 
 	fwrite(&mapInfo->hardness, 1, 80 * 21, file);
 
