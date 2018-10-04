@@ -20,6 +20,7 @@ MapInfo* CreateNewMapInfo()
 	int i;
 	MapInfo *newMapInfo = (MapInfo*)malloc(sizeof(MapInfo));
 	newMapInfo->map = (char*)malloc(HEIGHT * WIDTH * sizeof(char));
+	newMapInfo->mapLayout = (char*)malloc(HEIGHT * WIDTH * sizeof(char));
 	for(i=0; i< HEIGHT * WIDTH; i++)
 	{
 		newMapInfo->map[i] = ' ';
@@ -34,6 +35,7 @@ MapInfo* CreateNewMapInfo()
 	newMapInfo->Player.status = 1;
 	newMapInfo->Player.PCType = 16;
 	newMapInfo->Player.speed = 10;
+	newMapInfo->Player.symbol = '@';
 
 	newMapInfo->size.dx = WIDTH;
 	newMapInfo->size.dy = HEIGHT;
@@ -85,6 +87,8 @@ MapInfo* GenerateNewMap()
 	generateHallway(mapInfo);
 
 	updateHardness(mapInfo);
+
+	strcpy(mapInfo->mapLayout, mapInfo->map);
 
 	return mapInfo;
 }
@@ -265,7 +269,7 @@ void placeRoom(char* map, Room *room)
 	start.x = rand()%74 + 1;
 	start.y = rand()%18 +1;
     int counter = 0;
-    int i,j;
+
 
     while(1)
     {
@@ -336,6 +340,8 @@ void GenerateMonster(MapInfo *mapInfo)
 			mapInfo->Monsters[i].PCType += rand() % 2 * (int)pow(2, j);
 
 		mapInfo->Monsters[i].speed = rand() % 16 + 5;
+		mapInfo->Monsters[i].LastKnownPC.x = 255;
+		mapInfo->Monsters[i].LastKnownPC.y = 255;
 	}
 }
 
@@ -368,6 +374,7 @@ void placeAllPlayerPosition(MapInfo *mapInfo)
 	{
 		generatePlayerPosition(mapInfo, &mapInfo->Monsters[i], exclude);
 		mapInfo->map[PointToIndex(&(mapInfo->Monsters[i].Position))] = getMonsterSymbol(mapInfo->Monsters[i].PCType);
+		mapInfo->Monsters[i].symbol = getMonsterSymbol(mapInfo->Monsters[i].PCType);
 	}
 }
 

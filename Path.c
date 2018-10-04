@@ -18,10 +18,7 @@ void UpdatePath(MapInfo *mapInfo)
 		{
 			mapInfo->TunnelPath.Distance[i] -= mapInfo->hardness[i] / 85;
 		}
-
 	}
-
-
 }
 
 
@@ -55,7 +52,8 @@ void PathWalker(MapInfo *mapInfo, Point Des, Point Src, int Tunnel)
 			if (mapInfo->TunnelPath.Distance[desIndex] > mapInfo->TunnelPath.Distance[srcIndex] + 1 + ((int)mapInfo->hardness[desIndex] / 85))
 			{
 				mapInfo->TunnelPath.Distance[desIndex] = mapInfo->TunnelPath.Distance[srcIndex] + 1  + ((int)mapInfo->hardness[desIndex] / 85);
-				mapInfo->TunnelPath.ShortestPath[desIndex] = Src;
+				mapInfo->TunnelPath.ShortestPath[desIndex].x = Src.x;
+				mapInfo->TunnelPath.ShortestPath[desIndex].y = Src.y;
 				flag = 1;
 			}
 		}
@@ -65,7 +63,8 @@ void PathWalker(MapInfo *mapInfo, Point Des, Point Src, int Tunnel)
 			if (mapInfo->nonTunnelPath.Distance[desIndex] > mapInfo->nonTunnelPath.Distance[srcIndex] + 1)
 			{
 				mapInfo->nonTunnelPath.Distance[desIndex] = mapInfo->nonTunnelPath.Distance[srcIndex] + 1;
-				mapInfo->nonTunnelPath.ShortestPath[desIndex] = Src;
+				mapInfo->nonTunnelPath.ShortestPath[desIndex].x = Src.x;
+				mapInfo->nonTunnelPath.ShortestPath[desIndex].y = Src.y;
 				flag = 1;
 			}
 		}
@@ -118,7 +117,7 @@ int PathChecker(MapInfo *mapInfo, Point position, int Tunnel)
 	case '#':
 		return 1;
 	default:
-		return 0;
+		return 1;
 	}
 	return 0;
 

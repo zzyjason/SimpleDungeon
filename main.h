@@ -38,6 +38,8 @@ typedef struct
 	char PCType;
 	int status;
 	unsigned int speed;
+	char symbol;
+	Point LastKnownPC;
 }PC;
 
 typedef struct
@@ -52,6 +54,8 @@ typedef struct
 	unsigned char numsRoom;
 	Size size;
 	char *map;
+	char *mapLayout;
+
 	unsigned char hardness[80 * 21];
 	PC Player;
 	Path nonTunnelPath;

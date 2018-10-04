@@ -24,5 +24,7 @@ void heapifyDown(Heap *heap, unsigned int index);
 void* pop(Heap *heap);
 int push(Heap *heap, void* item);
 void* replace(Heap *heap, void* item);
+void* peak(Heap *heap);
+void printHeap(Heap *heap);
 
 #endif // !HEAP_H_

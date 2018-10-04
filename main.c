@@ -64,12 +64,17 @@ int main(int argc, char **argv)
 	UpdatePath(mapInfo);
 
 	printHallway(mapInfo);
-	//printHardness(mapInfo);
-	//printPath(mapInfo);
-
-	unsigned int round = 0;
+	printHardness(mapInfo);
+	printPath(mapInfo);
 
 	Heap* turn = CreateTurnManager(mapInfo);
+	
+	while (NextTurn(mapInfo, turn) != 0)
+	{
+		UpdatePath(mapInfo);
+	}
+
+	printf("Dead\n");
 
 
 	free(mapInfo->map);

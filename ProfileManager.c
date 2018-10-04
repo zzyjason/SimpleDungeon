@@ -106,8 +106,11 @@ void SaveProfile(MapInfo *mapInfo)
 void CreatProfileDir()
 {
 	GetProfileDir();
-	if (stat(profileDir, NULL) == -1)
+	struct stat b;
+	if (stat(profileDir, &b) == -1)
 		mkdir(profileDir, 0770);
+
+
 }
 
 void GetProfileDir()
