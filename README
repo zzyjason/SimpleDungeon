@@ -10,6 +10,7 @@ Point which has 2 int, x and y position
 Size which has 2 int, dx and dy for the size of anything.
 Room which include topleft point, room type(shape of the room, YES, room has different shapes, I have about 10 shapes randomlly picked. It will be removed for next checkpoint due to loading and saving requirement), size of the room, Point pointer for all the floor it cover(unsued currently)
 MapInfo has all the info for the map, rooms, nums Rooms, hallway Points, size, and the map which is char pointer sizes of 80*21
+There is a copy of the layout for map that has no player on it to keep track the layer. 
 
 ProfileManager
 Provide functionality of saving a dungeon and loading a dungeon.
@@ -27,3 +28,10 @@ mode with no tunnle which only finds the path that PC can go without tunnleing.
 mode with tunnle which finds all the path. With tunnleing cost is hardness of the block / 85. 
 it is provided in functions in path. 
 there is also a print path funtcion which print out the path for tunnle and notunnle.
+Updated to find with monster.
+
+
+TurnManager
+It useds heap to manage who goes first. Depending on the speed, monster could go multple time before PC had a chance to. 
+It also contain all the behavior of the monster. 
+There are 4 characteristics which could be obtain by monster for chance of 50%, Intelligence, Telepathy, Tunneling Ability, Erratic Behavior.

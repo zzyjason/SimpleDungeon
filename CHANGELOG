@@ -18,3 +18,9 @@ Fix Endian Read and Write issue with little endian cpu
 
 9/17/2018
 Finish Impelment Path Finding
+
+10/3/2018
+Update More sturct, PC and PCEvent.
+Impelemented Heap.
+Created TurnManager to mange the round who goes first.
+TurnManager also manager the behaviour of the monster. 

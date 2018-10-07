@@ -9,7 +9,7 @@
 #include "DungeonGenerator.h"
 #include "ProfileManager.h"
 #include "Heap.h"
-#include "TurnManger.h"
+#include "TurnManager.h"
 
 
 int main(int argc, char **argv)

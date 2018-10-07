@@ -7,5 +7,6 @@ int comparePoint(Point m, Point n);
 int KillPC(MapInfo *mapInfo, Point position);
 unsigned int NextTurn(MapInfo *mapInfo, Heap* turnManager);
 int CheckOfSight(MapInfo *mapInfo, Point position);
+void printHeap(Heap *heap);
 
 #endif // !TURN_MANAGER_H_

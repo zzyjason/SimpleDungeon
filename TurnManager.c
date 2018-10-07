@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "Heap.h"
 #include "main.h"
-#include "TurnManger.h"
+#include "TurnManager.h"
 #include "DungeonGenerator.h"
 #include <string.h>
 #include <limits.h>
@@ -341,4 +341,20 @@ int comparePoint(Point m, Point n)
 		return 1;
 
 	return 0;
+}
+
+
+
+void printHeap(Heap *heap)
+{
+	int i, counter = 0;
+	for (i = 0; i < heap->size; i++)
+	{
+		printf("%u ", ((PCEvent*)(heap->data[i].data))->Round);
+
+		if (counter % 2 == 0 && counter != 6 && counter != 10 && counter != 12 && counter != 14)
+			printf("\n");
+
+		counter++;
+	}
 }
