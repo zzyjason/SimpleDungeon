@@ -58,6 +58,7 @@ void LoadProfile(MapInfo *mapInfo)
 
 	fclose(file);
 	loadHallway(mapInfo);
+
 }
 
 void loadHallway(MapInfo *mapInfo)

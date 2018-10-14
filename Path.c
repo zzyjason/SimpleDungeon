@@ -9,9 +9,18 @@
 
 void UpdatePath(MapInfo *mapInfo)
 {
+
+	int i;
+	for (i = 0; i< 80 * 21; i++)
+	{
+		mapInfo->TunnelPath.Distance[i] = 65535;
+		mapInfo->nonTunnelPath.Distance[i] = 65535;
+	}
+
 	PathWalker(mapInfo, mapInfo->Player.Position, mapInfo->Player.Position, 0);
 	PathWalker(mapInfo, mapInfo->Player.Position, mapInfo->Player.Position, 1);
-	int i;
+
+
 	for (i = 0; i < 80 * 21; i++)
 	{
 		if (mapInfo->TunnelPath.Distance[i] != 65535 && mapInfo->TunnelPath.Distance[i] != 0)
@@ -106,19 +115,10 @@ int PathChecker(MapInfo *mapInfo, Point position, int Tunnel)
 		return 1;
 	}
 
-	switch (mapInfo->map[PointToIndex(&position)])
-	{
-	case ' ':
-		return 0;
-	case '@':
+
+	if (mapInfo->hardness[PointToIndex(&position)] == 0)
 		return 1;
-	case '.':
-		return 1;
-	case '#':
-		return 1;
-	default:
-		return 1;
-	}
+
 	return 0;
 
 }

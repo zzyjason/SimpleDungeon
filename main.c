@@ -10,6 +10,7 @@
 #include "ProfileManager.h"
 #include "Heap.h"
 #include "TurnManager.h"
+#include <ncurses.h>
 
 
 int main(int argc, char **argv)
@@ -57,26 +58,62 @@ int main(int argc, char **argv)
 	if (saveFlag)
 	    SaveProfile(mapInfo);
 
+	generateStairs(mapInfo);
+
 	mapInfo->numMonster = numMon;
 	GenerateMonster(mapInfo);
 	placeAllPlayerPosition(mapInfo);
 
+
 	UpdatePath(mapInfo);
 
-	printHallway(mapInfo);
-	printHardness(mapInfo);
-	printPath(mapInfo);
+	//printHallway(mapInfo);
+	//printHardness(mapInfo);
+	//printPath(mapInfo);
 
 	Heap* turn = CreateTurnManager(mapInfo);
 	
-	while (NextTurn(mapInfo, turn) != 0)
+	initscr();
+	curs_set(0);
+	int result;
+
+	do
 	{
-		UpdatePath(mapInfo);
+		result = NextTurn(mapInfo, turn);
+		if (result != 0)
+			continue;
+
+
+		free(mapInfo->map);
+		free(mapInfo->rooms);
+		free(mapInfo->Monsters);
+		free(mapInfo);
+		mapInfo = GenerateNewMap();
+		generateStairs(mapInfo);
+		mapInfo->numMonster = numMon;
+		GenerateMonster(mapInfo);
+		placeAllPlayerPosition(mapInfo);
+		free(turn);
+		turn = CreateTurnManager(mapInfo);
+
+	} while (result >= 0);
+
+	switch (result)
+	{
+		case -1:
+			mvprintw(23, 0, "Dead");
+			break;
+
+		case -2:
+			mvprintw(23, 0, "Quit");
+			break;
 	}
 
-	printf("Dead\n");
-
-
+	refresh();
+	getch();
+	endwin();
+	
+	free(turn);
 	free(mapInfo->map);
 	free(mapInfo->rooms);
 	free(mapInfo->Monsters);

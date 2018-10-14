@@ -7,6 +7,9 @@
 #include "DungeonGenerator.h"
 #include <string.h>
 #include <limits.h>
+#include <ncurses.h>
+#include "Path.h"
+#include "main.h"
 
 
 Heap* CreateTurnManager(MapInfo *mapInfo)
@@ -42,7 +45,7 @@ int ComparePC(void* PC1, void*PC2)
 }
 
 
-unsigned int NextTurn(MapInfo *mapInfo, Heap* turnManager)
+int NextTurn(MapInfo *mapInfo, Heap* turnManager)
 {
 	PCEvent* Next = (PCEvent *)peak(turnManager);
 
@@ -55,47 +58,307 @@ unsigned int NextTurn(MapInfo *mapInfo, Heap* turnManager)
 			return 0;
 	}
 
-	unsigned int turn = Next->Round;
+	int turn = Next->Round;
 
-	if (PCAction(mapInfo, Next->Player) == -1)
-		return 0;
-
-	Next->Round = turn + 1000 / Next->Player->speed;
-	heapifyDown(turnManager, 0);
 
 	if (Next->Player->PCType == 16)
 	{
 		printHallway(mapInfo);
-		usleep(500000);
+
+		refresh();
 	}
 
+	int result = PCAction(mapInfo, Next->Player);
+	if (result < 0)
+		return result;
+
+	if (result == 3 || result == 4)
+	{
+		return 0;
+	}
+
+	Next->Round = turn + 1000 / Next->Player->speed;
+	heapifyDown(turnManager, 0);
 
 	return turn;
 }
 
+int UserAction(MapInfo *mapInfo, PC *Player)
+{
+	flushinp();
+	char input;
+	Point nextMove;
+	WINDOW *info = NULL;
+
+	do
+	{
+		nextMove.x = 255;
+		nextMove.y = 255;
+		noecho();
+		input = getch();
+
+
+		if (input == '7' || input == 'y')
+		{
+			nextMove.x = Player->Position.x - 1;
+			nextMove.y = Player->Position.y - 1;
+		}
+		else if (input == '8' || input == 'k')
+		{
+			nextMove.x = Player->Position.x;
+			nextMove.y = Player->Position.y - 1;
+		}
+		else if (input == '9' || input == 'u')
+		{
+			nextMove.x = Player->Position.x + 1;
+			nextMove.y = Player->Position.y - 1;
+		}
+		else if (input == '6' || input == 'l')
+		{
+			nextMove.x = Player->Position.x + 1;
+			nextMove.y = Player->Position.y;
+		}
+		else if (input == '3' || input == 'n')
+		{
+			nextMove.x = Player->Position.x + 1;
+			nextMove.y = Player->Position.y + 1;
+		}
+		else if (input == '2' || input == 'j')
+		{
+			nextMove.x = Player->Position.x;
+			nextMove.y = Player->Position.y + 1;
+		}
+		else if (input == '1' || input == 'b')
+		{
+			nextMove.x = Player->Position.x - 1;
+			nextMove.y = Player->Position.y + 1;
+
+		}
+		else if (input == '4' || input == 'h')
+		{
+			nextMove.x = Player->Position.x - 1;
+			nextMove.y = Player->Position.y;
+
+		}
+		else if (input == '5' || input == ' ')
+		{
+			nextMove.x = Player->Position.x;
+			nextMove.y = Player->Position.y;
+
+		}
+		else if (input == '>')
+		{
+			if(mapInfo->mapLayout[PointToIndex(&(Player->Position))] == '>')
+				return 3;
+		}
+		else if (input == '<')
+		{
+			if (mapInfo->mapLayout[PointToIndex(&(Player->Position))] == '<')
+				return 4;
+		}
+		else if (input == 'm')
+		{
+			if (info == NULL)
+			{
+				info = newwin(15, 60, 3, 10);
+				wborder(info, '|', '|', '-', '-', '+', '+', '+', '+');
+				DisplayMonsterInfo(mapInfo, info, 0);
+			}
+		}
+		else if (input == 27)
+		{
+			if (info != NULL)
+			{
+				nodelay(info, 1);
+				wgetch(info);
+				switch (wgetch(info))
+				{
+					case 'A':
+						DisplayMonsterInfo(mapInfo, info, -1);
+
+						break;
+
+					case 'B':
+
+						DisplayMonsterInfo(mapInfo, info, 1);
+
+						break;
+
+					case ERR:
+
+						delwin(info);
+						refresh();
+						info = NULL;
+						printHallway(mapInfo);
+						break;
+				}
+				nodelay(info, 0);
+				flushinp();
+			}
+		}
+		else if (input == 'q')
+		{
+			return -2;
+		}
+
+	} while (!MovePC(mapInfo, Player, nextMove));
+
+	UpdatePath(mapInfo);
+
+	return 0;
+}
+void DisplayMonsterInfo(MapInfo *mapInfo, WINDOW *info, int offset)
+{
+	static int currentIndex = 0;
+	int i, counter, monster = 0, total = 0;
+	
+	for (i = 0; i < mapInfo->numMonster; i++)
+	{
+		if (mapInfo->Monsters[i].status == 1)
+		{
+			total++;
+			if (i >= currentIndex)
+				monster++;
+		}
+	}
+
+	switch (offset)
+	{
+		case 1:
+			if (monster - 6 > 0)
+				currentIndex++;
+			break;
+		case -1:
+			if (currentIndex != 0)
+				currentIndex--;
+			break;
+	}
+
+
+	wmove(info, 1, 2);
+	wprintw(info, "There is %d Monsters. Use Up/Down Arrow to Scroll", total);
+
+	int xOffset, yOffset, skip=0;
+	char dir1[5], dir2[6];
+
+	for (i = 0, counter = 0; i < mapInfo->numMonster && counter < 12; i++)
+	{
+		if (mapInfo->Monsters[i].status == 0)
+			continue;
+
+		if (skip < currentIndex)
+		{
+			skip++;
+			continue;
+		}
+		
+		xOffset = mapInfo->Player.Position.x - mapInfo->Monsters[i].Position.x;
+		yOffset = mapInfo->Player.Position.x - mapInfo->Monsters[i].Position.y;
+
+		wmove(info, ++counter + 1, 2);
+		
+		if (xOffset >= 0)
+		{
+			strcpy(dir1, "West");
+		}
+		else
+		{
+			strcpy(dir1, "East");
+		}
+
+		if (yOffset >= 0)
+		{
+			strcpy(dir2, "South");
+		}
+		else
+		{
+			strcpy(dir2, "North");
+		}
+
+		wprintw(info, "Monster %c: Location %s %d	%s %d", mapInfo->Monsters[i].symbol, dir1, abs(xOffset), dir2, abs(yOffset));
+		counter++;
+	}
+
+	wrefresh(info);
+
+
+}
+
+int MovePC(MapInfo *mapInfo, PC *Player, Point nextMove)
+{
+	int flag = ValidateNextMove(mapInfo, nextMove, Player->PCType & 0b0010);
+	
+	if (flag == 0)
+		return 0;
+
+	if (flag == 1)
+	{
+		mapInfo->hardness[PointToIndex(&nextMove)] = 0;
+
+		if (mapInfo->mapLayout[PointToIndex(&(nextMove))] == ' ')
+			mapInfo->mapLayout[PointToIndex(&(nextMove))] = '#';
+		
+
+		if (mapInfo->map[PointToIndex(&(nextMove))] != mapInfo->mapLayout[PointToIndex(&(nextMove))])
+			if (KillPC(mapInfo, nextMove) == -1)
+				return -1;
+
+		mapInfo->map[PointToIndex(&(Player->Position))] = mapInfo->mapLayout[PointToIndex(&(Player->Position))];
+		mapInfo->map[PointToIndex(&(nextMove))] = Player->symbol;
+		Player->Position.x = nextMove.x;
+		Player->Position.y = nextMove.y;
+		return 1;
+	}
+
+	if (flag == 2)
+	{
+		mapInfo->hardness[PointToIndex(&nextMove)] -= 85;
+		return 2;
+	}
+	return 0;
+}
+
+int ValidateNextMove(MapInfo *mapInfo, Point nextMove, int tunnle)
+{
+	if (nextMove.x < 1 || nextMove.x > 79 || nextMove.y > 19 || nextMove.y < 1)
+		return 0;
+
+	unsigned char hardness = mapInfo->hardness[PointToIndex(&nextMove)];
+	if (tunnle)
+	{
+		if (hardness == 255)
+			return 0;
+		else if (hardness <= 85)
+			return 1; 
+		else
+			return 2;
+	}
+	else if (hardness > 0)
+		return 0;
+	
+	return 1;
+
+}
+
 int PCAction(MapInfo *mapInfo, PC *Player)
 {
-	Point Now;
-	Point NextMove;
+	Point Now = Player->Position;
+	Point NextMove = Now;
 
-	Now.x = Player->Position.x;
-	Now.y = Player->Position.y;
-
-	NextMove.x = Now.x;
-	NextMove.y = Now.y;
-
-	int random;
+	int random = 0;
 
 	if (Player->PCType == 16)
-		return 0;
+	{
+		return UserAction(mapInfo, Player);
+	}
 
 	if (Player->PCType & 0b00100 || CheckOfSight(mapInfo, Player->Position))
 	{
-		Player->LastKnownPC.x = mapInfo->Player.Position.x;
-		Player->LastKnownPC.y = mapInfo->Player.Position.y;
+		Player->LastKnownPC = mapInfo->Player.Position;
 	}
 	else
 		random = 1;
+
 	
 	if (Player->PCType & 0b01000)
 	{
@@ -105,14 +368,11 @@ int PCAction(MapInfo *mapInfo, PC *Player)
 		{
 			if (Player->PCType & 0b00010)
 			{
-
-				NextMove.x = mapInfo->TunnelPath.ShortestPath[PointToIndex(&Now)].x;
-				NextMove.y = mapInfo->TunnelPath.ShortestPath[PointToIndex(&Now)].y;
+				NextMove = mapInfo->TunnelPath.ShortestPath[PointToIndex(&Now)];
 			}
 			else
 			{
-				NextMove.x = mapInfo->nonTunnelPath.ShortestPath[PointToIndex(&Now)].x;
-				NextMove.y = mapInfo->nonTunnelPath.ShortestPath[PointToIndex(&Now)].y;
+				NextMove = mapInfo->nonTunnelPath.ShortestPath[PointToIndex(&Now)];
 			}
 		}
 
@@ -132,98 +392,77 @@ int PCAction(MapInfo *mapInfo, PC *Player)
 		else
 		{
 			if (Player->Position.x > mapInfo->Player.Position.x)
-				NextMove.x++;
-			if (Player->Position.x < mapInfo->Player.Position.x)
 				NextMove.x--;
+			if (Player->Position.x < mapInfo->Player.Position.x)
+				NextMove.x++;
 
 
 			if (Player->Position.y > mapInfo->Player.Position.y)
-				NextMove.y++;
-			if (Player->Position.y < mapInfo->Player.Position.y)
 				NextMove.y--;
+			if (Player->Position.y < mapInfo->Player.Position.y)
+				NextMove.y++;
 		}
 		
 	}
 
 	if ((Player->PCType & 0b00001 && rand() % 2) || random)
 	{
-		
 		do
 		{
-			random = rand() % 8;
-			NextMove.x = Player->Position.x;
-			NextMove.y = Player->Position.y;
+			NextMove = randomMove(Player->Position);
 
-			switch (random)
-			{
-				case 0:
-					NextMove.x++;
-					break;
-
-				case 1:
-					NextMove.x--;
-					break;
-
-				case 2:
-					NextMove.y++;
-					break;
-
-				case 3:
-					NextMove.y--;
-					break;
-
-				case 4:
-					NextMove.x++;
-					NextMove.y++;
-					break;
-
-				case 5:
-					NextMove.x++;
-					NextMove.y--;
-					break;
-
-				case 6:
-					NextMove.x--;
-					NextMove.y++;
-					break;
-
-				case 7:
-					NextMove.x--;
-					NextMove.y--;
-					break;
-
-			}
-
-			random = 0;
-		} while (mapInfo->map[PointToIndex(&NextMove)] == ' ' && (Player->PCType & 0b00010));
+		} while (!ValidateNextMove(mapInfo, NextMove, (Player->PCType & 0b00010)));
 	}
 
+	
+	return MovePC(mapInfo, Player, NextMove);
 
-	if (mapInfo->map[PointToIndex(&NextMove)] == ' ')
+	
+}
+
+Point randomMove(Point from)
+{
+	Point result = from;
+	switch (rand() % 8)
 	{
-		if (mapInfo->hardness[PointToIndex(&NextMove)] > 85)
-		{
-			mapInfo->hardness[PointToIndex(&NextMove)] -= 85;
-			return 0;
-		}
+		case 0:
+			result.x++;
+			break;
 
-		mapInfo->hardness[PointToIndex(&NextMove)] = 0;
-		mapInfo->mapLayout[PointToIndex(&NextMove)] = '#';
+		case 1:
+			result.x--;
+			break;
 
+		case 2:
+			result.y++;
+			break;
+
+		case 3:
+			result.y--;
+			break;
+
+		case 4:
+			result.x++;
+			result.y++;
+			break;
+
+		case 5:
+			result.x++;
+			result.y--;
+			break;
+
+		case 6:
+			result.x--;
+			result.y++;
+			break;
+
+		case 7:
+			result.x--;
+			result.y--;
+			break;
 	}
 
-	if (mapInfo->map[PointToIndex(&NextMove)] != '.' && mapInfo->map[PointToIndex(&NextMove)] != '#')
-	{
-		if (KillPC(mapInfo, NextMove) == -1)
-			return -1;
-	}
-
-	mapInfo->map[PointToIndex(&NextMove)] = Player->symbol;
-	mapInfo->map[PointToIndex(&Now)] = mapInfo->mapLayout[PointToIndex(&Now)];
-	Player->Position.x = NextMove.x;
-	Player->Position.y = NextMove.y;
-
-	return 0;
+	return result;
 }
 
 int CheckOfSight(MapInfo *mapInfo, Point position)
@@ -238,14 +477,14 @@ int CheckOfSight(MapInfo *mapInfo, Point position)
 	int yMax = INT_MAX;
 
 	
-	while (mapInfo->map[PointToIndex(&current)] == '.' || mapInfo->map[PointToIndex(&current)] == '#')
+	while (mapInfo->hardness[PointToIndex(&current)] == 0)
 	{
 		current.x--;
 
 		if (mapInfo->map[PointToIndex(&current)] == '@')
 			return 1;
 
-		while ((mapInfo->map[PointToIndex(&current)] == '.' || mapInfo->map[PointToIndex(&current)] == '#') && count <= yMin)
+		while (mapInfo->hardness[PointToIndex(&current)] == 0 && count <= yMin)
 		{
 			current.y--;
 			if (mapInfo->map[PointToIndex(&current)] == '@')
@@ -257,7 +496,7 @@ int CheckOfSight(MapInfo *mapInfo, Point position)
 		yMin = count;
 		count = 0;
 
-		while ((mapInfo->map[PointToIndex(&current)] == '.' || mapInfo->map[PointToIndex(&current)] == '#') && count <= yMax)
+		while (mapInfo->hardness[PointToIndex(&current)] == 0 && count <= yMax)
 		{
 			current.y++;
 			if (mapInfo->map[PointToIndex(&current)] == '@')
@@ -276,10 +515,10 @@ int CheckOfSight(MapInfo *mapInfo, Point position)
 	current.x = position.x;
 	current.y = position.y;
 
-	while (mapInfo->map[PointToIndex(&current)] == '.' || mapInfo->map[PointToIndex(&current)] == '#')
+	while (mapInfo->hardness[PointToIndex(&current)] == 0)
 	{
 		
-		while ((mapInfo->map[PointToIndex(&current)] == '.' || mapInfo->map[PointToIndex(&current)] == '#') && count <= yMin)
+		while (mapInfo->hardness[PointToIndex(&current)] == 0  && count <= yMin)
 		{
 			current.y--;
 			if (mapInfo->map[PointToIndex(&current)] == '@')
@@ -291,7 +530,7 @@ int CheckOfSight(MapInfo *mapInfo, Point position)
 		yMin = count;
 		count = 0;
 
-		while ((mapInfo->map[PointToIndex(&current)] == '.' || mapInfo->map[PointToIndex(&current)] == '#') && count <= yMax)
+		while (mapInfo->hardness[PointToIndex(&current)] == 0 && count <= yMax)
 		{
 			current.y++;
 			if (mapInfo->map[PointToIndex(&current)] == '@')
@@ -347,14 +586,15 @@ int comparePoint(Point m, Point n)
 
 void printHeap(Heap *heap)
 {
-	int i, counter = 0;
+	int i;
+	mvprintw(26, 0, "                                                                           ");
 	for (i = 0; i < heap->size; i++)
 	{
-		printf("%u ", ((PCEvent*)(heap->data[i].data))->Round);
+		mvprintw(26, 6*i,"%d%c ", ((PCEvent*)(heap->data[i].data))->Round, ((PCEvent*)(heap->data[i].data))->Player->symbol);
 
-		if (counter % 2 == 0 && counter != 6 && counter != 10 && counter != 12 && counter != 14)
-			printf("\n");
+		if (i % 2 == 0 && i!=4  && i != 8 && i!= 10)
+			mvprintw(26, 6*(i+1) - 1, "|");
 
-		counter++;
+
 	}
 }

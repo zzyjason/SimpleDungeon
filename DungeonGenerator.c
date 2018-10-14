@@ -5,6 +5,7 @@
 #include "DungeonGenerator.h"
 
 #include <string.h>
+#include <ncurses.h>
 
 
 #define HEIGHT 21
@@ -21,13 +22,13 @@ MapInfo* CreateNewMapInfo()
 	MapInfo *newMapInfo = (MapInfo*)malloc(sizeof(MapInfo));
 	newMapInfo->map = (char*)malloc(HEIGHT * WIDTH * sizeof(char));
 	newMapInfo->mapLayout = (char*)malloc(HEIGHT * WIDTH * sizeof(char));
+
 	for(i=0; i< HEIGHT * WIDTH; i++)
 	{
 		newMapInfo->map[i] = ' ';
 		newMapInfo->hardness[i] = 0;
 		newMapInfo->TunnelPath.Distance[i] = 65535;
 		newMapInfo->nonTunnelPath.Distance[i] = 65535;
-		
 	}
 	newMapInfo->numsRoom = 0;
 	newMapInfo->Player.Position.x = 1;
@@ -117,7 +118,7 @@ void printHardness(MapInfo *mapInfo)
 void updateHardness(MapInfo *mapInfo)
 {
 	int i = 0;
-	for (; i < 80 * 21; i++)
+	for (; i < HEIGHT * WIDTH; i++)
 	{
 		switch (mapInfo->map[i])
 		{
@@ -191,17 +192,20 @@ void findRoomRandomPoint(Room room, Point *point)
 void printHallway(MapInfo *mapInfo)
 {
 	int i, j;
-	printf("----------------------------------------------------------------------------------\n");
+	
 	for (i = 0; i<HEIGHT; i++)
 	{
-		printf("|");
-		for (j = 0; j<WIDTH; j++)
+		j = 0;
+
+		for (; j<WIDTH; j++)
 		{
-			printf("%c", mapInfo->map[CoordinatesToIndex(j, i)]);
+			mvaddch(i,j, mapInfo->map[CoordinatesToIndex(j, i)]);
 		}
-		printf("|\n");
+
 	}
-	printf("----------------------------------------------------------------------------------\n");
+	mvprintw(0, 0, "----------------------------------------------------------------------------------");
+
+
 }
 
 int PointToIndex(Point* point)
@@ -381,4 +385,45 @@ void placeAllPlayerPosition(MapInfo *mapInfo)
 char getMonsterSymbol(char MonsterType)
 {
 	return MonsterType % 16 + 65;
+}
+
+void generateStairs(MapInfo *mapInfo)
+{
+	int up = rand() % 3 + 1;
+	int down = rand() % 3 + 1;
+
+
+	generateStairsWorkers(mapInfo, '<', up);
+	generateStairsWorkers(mapInfo, '>', down);
+}
+
+void generateStairsWorkers(MapInfo *mapInfo, char symbol, int count)
+{
+	int temp;
+	int i;
+	int flag = 0;
+
+	while (count != 0)
+	{
+		temp = rand() % 2000 + 1;
+		flag = 0;
+		for (i = 0; 1; i = (i + 1)%(80*21))
+		{
+			temp--;
+			if (flag)
+			{
+				if (mapInfo->mapLayout[i] == '#' || mapInfo->mapLayout[i] == '.')
+				{
+					mapInfo->mapLayout[i] = symbol;
+					mapInfo->map[i] = symbol;
+					count--;
+					break;
+				}
+			}
+
+			if (temp <= 0)
+				flag = 1;
+
+		}
+	}
 }

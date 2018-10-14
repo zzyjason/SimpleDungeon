@@ -23,5 +23,6 @@ int CoordinatesToIndex(int x, int y);
 void placeAllPlayerPosition(MapInfo *mapInfo);
 void GenerateMonster(MapInfo *mapInfo);
 char getMonsterSymbol(char MonsterType);
-
+void generateStairsWorkers(MapInfo *mapInfo, char symbol, int count);
+void generateStairs(MapInfo *mapInfo);
 #endif 

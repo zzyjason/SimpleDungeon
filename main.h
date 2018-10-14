@@ -45,7 +45,7 @@ typedef struct
 typedef struct
 {
 	PC *Player;
-	unsigned int Round;
+	int Round;
 }PCEvent;
 
 typedef struct

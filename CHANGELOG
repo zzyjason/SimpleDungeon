@@ -24,3 +24,10 @@ Update More sturct, PC and PCEvent.
 Impelemented Heap.
 Created TurnManager to mange the round who goes first.
 TurnManager also manager the behaviour of the monster. 
+
+10/14/2018
+Added NCurser to display Game
+Added User Input Behaviour.
+Added new map feature with going up and down stair.
+Added popup window to show list of monster.
+Added Quit feature allowing user to Quit
