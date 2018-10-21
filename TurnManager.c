@@ -51,7 +51,7 @@ int NextTurn(MapInfo *mapInfo, Heap* turnManager)
 
 	while (Next->Player->status == 0)
 	{
-		pop(turnManager);
+		free(pop(turnManager));
 		Next = (PCEvent *)peak(turnManager);
 
 		if (Next == NULL)
@@ -205,6 +205,9 @@ int UserAction(MapInfo *mapInfo, PC *Player)
 
 	UpdatePath(mapInfo);
 
+	if (info != NULL)
+		delwin(info);
+
 	return 0;
 }
 void DisplayMonsterInfo(MapInfo *mapInfo, WINDOW *info, int offset)
@@ -253,7 +256,7 @@ void DisplayMonsterInfo(MapInfo *mapInfo, WINDOW *info, int offset)
 		}
 		
 		xOffset = mapInfo->Player.Position.x - mapInfo->Monsters[i].Position.x;
-		yOffset = mapInfo->Player.Position.x - mapInfo->Monsters[i].Position.y;
+		yOffset = mapInfo->Player.Position.y - mapInfo->Monsters[i].Position.y;
 
 		wmove(info, ++counter + 1, 2);
 		
@@ -268,11 +271,11 @@ void DisplayMonsterInfo(MapInfo *mapInfo, WINDOW *info, int offset)
 
 		if (yOffset >= 0)
 		{
-			strcpy(dir2, "South");
+			strcpy(dir2, "North");
 		}
 		else
 		{
-			strcpy(dir2, "North");
+			strcpy(dir2, "South");
 		}
 
 		wprintw(info, "Monster %c: Location %s %d	%s %d", mapInfo->Monsters[i].symbol, dir1, abs(xOffset), dir2, abs(yOffset));

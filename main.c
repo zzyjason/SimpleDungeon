@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 
 	Heap* turn = CreateTurnManager(mapInfo);
 	
-	initscr();
+	WINDOW* scr = initscr();
 	curs_set(0);
 	int result;
 
@@ -83,8 +83,10 @@ int main(int argc, char **argv)
 		if (result != 0)
 			continue;
 
-
+		while (turn->size != 0)
+			free(pop(turn));
 		free(mapInfo->map);
+		free(mapInfo->mapLayout);
 		free(mapInfo->rooms);
 		free(mapInfo->Monsters);
 		free(mapInfo);
@@ -93,6 +95,7 @@ int main(int argc, char **argv)
 		mapInfo->numMonster = numMon;
 		GenerateMonster(mapInfo);
 		placeAllPlayerPosition(mapInfo);
+		free(turn->data);
 		free(turn);
 		turn = CreateTurnManager(mapInfo);
 
@@ -111,10 +114,18 @@ int main(int argc, char **argv)
 
 	refresh();
 	getch();
-	endwin();
 	
+	endwin();
+	delwin(scr);
+
+
+	
+	while (turn->size != 0)
+		free(pop(turn));
+	free(turn->data);
 	free(turn);
 	free(mapInfo->map);
+	free(mapInfo->mapLayout);
 	free(mapInfo->rooms);
 	free(mapInfo->Monsters);
 	free(mapInfo);

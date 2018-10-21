@@ -157,6 +157,8 @@ void cleanInvalidRoom(MapInfo *mapInfo)
 	}
 	memcpy(mapInfo->rooms, result, sizeof(Room) * count);
 	mapInfo->numsRoom = count;
+	free(result);
+	
 }
 
 
