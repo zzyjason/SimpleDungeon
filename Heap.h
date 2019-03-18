@@ -1,30 +1,30 @@
 #ifndef HEAP_H_
-
-#include <stdlib.h>
+#define HEAP_H_
 
 typedef struct
 {
 	void *data;
-}Heap_Node;
+}HeapNode;
 
-
-typedef struct
+class Heap
 {
-	Heap_Node* data;
-	int maxSize;
-	int size;
+	private:
+		
 
-	int(*comparator)(void *, void *);
-}Heap;
+	public:
+		HeapNode* data;
+		int maxSize;
+		int size;
+		int(*comparator)(void*, void*);
+		
+		Heap(int size, int(*comparators)(void*, void*));
+		
+		void* pop();
+		int push(void* item);
+		void* replace(void* item);
+		void* peak();
+		void heapifyUp(unsigned int index);
+		void heapifyDown(unsigned int index);
+};
 
-
-void createHeap(Heap *heap, int size, int(*comparator)(void *, void *));
-void heapifyUp(Heap *heap, unsigned int index);
-void heapifyDown(Heap *heap, unsigned int index);
-void* pop(Heap *heap);
-int push(Heap *heap, void* item);
-void* replace(Heap *heap, void* item);
-void* peak(Heap *heap);
-
-
-#endif // !HEAP_H_
+#endif

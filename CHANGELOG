@@ -31,3 +31,36 @@ Added User Input Behaviour.
 Added new map feature with going up and down stair.
 Added popup window to show list of monster.
 Added Quit feature allowing user to Quit
+
+
+10/25/2018
+Convert most component to C++ OOP style. 
+Added Telepoart feature. 
+Added Fog Map Feature.
+
+10/30/2018
+Added Monster Template Parser. Parse txt info into game.
+	Created new class for monster template, added functions to namespace Profile. 
+	
+11/11/2018
+new Item available in game, new char in monster 
+Load Monster and Item from file
+Added Color Support to Monster, and Item
+
+11/15/2018
+Added new command
+w -> Wear an item
+t -> take off an item
+d -> drop an item
+x -> expunge an item
+i -> list PC inventory
+e -> list PC equipment
+i -> inspect an item
+L -> Look at a monster.
+Updated combat with damage
+
+11/27/2018
+Added Characters regenerate hitpoints at a rate of some percentage of their maximum hitpoints per game turn.
+Make dodge, defense, weight, and hit item attributes meaningful.
+Add meaningful dungeon levels which load more powerful monsters as you go down, easier monsters
+as you go up, perhaps a town with shops at the top.

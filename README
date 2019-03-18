@@ -1,6 +1,12 @@
 This is a simple dungeon like game.
 Below is the detail info about each component of the game.
 
+Added monster parser, parse monster template info from file that should be call monster_desc.txt.
+It should be place under the game profile dir. 
+how the monster info should formated, please check out a existed monster_desc.txt
+
+Converted Everything in C++, Added Fog Mode, and Teleport Feature allows player to teleport anywhere within the map. 
+
 Added NCurser to display Game 
 NOTE: when acess with putty, putty setting need to change inorder to display correctly.
 Terminal-type String change from xterm to putty
@@ -16,6 +22,8 @@ Room which include topleft point, room type(shape of the room, YES, room has dif
 MapInfo has all the info for the map, rooms, nums Rooms, hallway Points, size, and the map which is char pointer sizes of 80*21
 There is a copy of the layout for map that has no player on it to keep track the layer. 
 Added functions to generate random stairs.
+Added new layer for saving item location
+Added dungeon level.
 
 ProfileManager
 Provide functionality of saving a dungeon and loading a dungeon.
@@ -41,3 +49,14 @@ It useds heap to manage who goes first. Depending on the speed, monster could go
 It also contain all the behavior of the monster. 
 There are 4 characteristics which could be obtain by monster for chance of 50%, Intelligence, Telepathy, Tunneling Ability, Erratic Behavior.
 Added User Action Controls. 
+Added a few command go along with items. 
+Updated combat with damage, monster or PC wont die instantly.
+Added Characters regenerate hp every round
+Added Support to dodge, defense and weight to have effect.
+
+
+Character
+
+Character are the base class, extends with PC, and NPC. NPCs are the monster. 
+class Item holds info about Item. There is also ItemTemplate and Monster Template Class. 
+Added dodge, defense and weight to class.

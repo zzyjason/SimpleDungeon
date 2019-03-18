@@ -1,8 +1,26 @@
 #ifndef PATH_H_
+#define PATH_H_
 
-void UpdatePath(MapInfo *mapInfo);
-void PathWalker(MapInfo *mapInfo, Point Des, Point Src, int Tunnel);
-int PathChecker(MapInfo *mapInfo, Point position, int Tunnel);
-void printPath(MapInfo *mapInfo);
+#include "Util.h"
+#include "Dungeon.h"
 
-#endif // !PATH_H_
+
+
+class Dungeon;
+
+class Path
+{
+	private:
+		void PathWalker(Dungeon &dungeon, Point des, Point src, bool tunnel);
+		bool PathChecker(Dungeon &dungeon, Point position, bool tunnel);
+
+
+	public:
+		unsigned short Distance[80 * 21];
+		Point ShortestPath[80 * 21];
+		Path();
+		Path(bool tunnle, Dungeon dungeon);
+		void Construct(bool tunnle, Dungeon dungeon);
+};
+
+#endif
